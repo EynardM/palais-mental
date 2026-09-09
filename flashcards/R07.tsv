@@ -1,0 +1,61 @@
+Sur quels transports et quel port fonctionne le DNS ?	UDP et TCP, port 53
+Taille de l'en-tête d'un message DNS ?	12 octets
+Taille maximale d'un label DNS ?	63 octets
+Taille maximale d'un FQDN sur le fil ?	255 octets
+Taille maximale d'une réponse DNS en UDP sans EDNS0 ?	512 octets
+Que fait le client quand le bit TC d'une réponse DNS est à 1 ?	Il rejoue la même requête en TCP sur le port 53
+Taille de charge utile UDP recommandée en EDNS0 depuis le DNS Flag Day 2020 ?	1232 octets
+Que signifie le drapeau AA dans une réponse DNS ?	La réponse vient du serveur autoritatif de la zone
+Différence entre une requête DNS récursive et une requête itérative ?	Récursive : « rends-moi la réponse finale ». Itérative : « donne ce que tu sais », souvent juste une délégation
+Que signifie NOERROR avec ANCOUNT = 0 ?	NODATA : le nom existe mais ne porte pas ce type d'enregistrement
+Quel RCODE renvoie un résolveur quand la validation DNSSEC échoue ?	SERVFAIL (code 2)
+Que définit le dernier champ du SOA (MINIMUM) ?	Le TTL du cache négatif : la durée de mise en cache d'un NXDOMAIN
+Pourquoi un CNAME est-il interdit à l'apex d'une zone ?	Un CNAME exclut tout autre type, or l'apex porte obligatoirement un SOA et des NS
+Dans un enregistrement MX, quelle préférence est préférée ?	La plus basse
+Que contient un enregistrement SRV, dans l'ordre ?	Priorité, poids, port, cible
+Dans quel domaine vivent les PTR d'adresses IPv4 ?	in-addr.arpa, avec les octets écrits à l'envers
+À quoi sert un glue record ?	Donner l'IP d'un serveur de noms situé dans la zone qu'il sert, pour casser la dépendance circulaire
+Combien de noms de serveurs racine existe-t-il ?	13, de a à m .root-servers.net, chacun déployé en anycast
+DNSSEC chiffre-t-il les requêtes DNS ?	Non, il signe seulement : authenticité et intégrité, pas confidentialité
+Quel enregistrement lie une zone signée à son parent ?	Le DS, hash de la KSK de l'enfant publié dans la zone du parent
+Port de DNS over TLS (DoT) ?	TCP 853
+Sur quel port et quel chemin fonctionne DNS over HTTPS ?	HTTPS 443, chemin /dns-query
+Combien de temps la JVM cache-t-elle une résolution DNS par défaut ?	30 secondes (10 s en négatif), en ignorant le TTL DNS
+Ordre correct des étapes d'une migration DNS ?	Baisser le TTL, attendre au moins l'ancien TTL, basculer l'enregistrement, remonter le TTL
+Quel est le FQDN d'un service Kubernetes ?	service.namespace.svc.cluster.local
+Qu'obtient-on avec clusterIP: None sur un Service ?	Un service headless : un A par pod prêt, et un nom individuel par pod de StatefulSet
+Que fait « options ndots:5 » dans un pod ?	Tout nom à moins de 5 points est d'abord essayé avec chaque suffixe de search avant d'être essayé tel quel
+Cause d'un timeout DNS de exactement 5 secondes dans un pod ?	Une course dans conntrack entre les requêtes A et AAAA, DNAT-ées en parallèle depuis le même port source
+Ports de DHCPv4 ?	UDP 68 côté client, UDP 67 côté serveur
+Que signifie l'acronyme DORA ?	Discover, Offer, Request, Acknowledge
+Pourquoi le REQUEST de DORA est-il envoyé en broadcast ?	Pour que les serveurs DHCP non retenus libèrent l'adresse qu'ils avaient réservée
+Quel champ DHCP porte l'adresse proposée au client ?	yiaddr (your IP address)
+À quel pourcentage du bail DHCP le client passe-t-il en RENEWING (T1) ?	50 %
+À quel pourcentage du bail DHCP le client passe-t-il en REBINDING (T2) ?	87,5 %
+Différence entre RENEWING et REBINDING en DHCP ?	RENEW est un unicast vers le serveur d'origine, REBIND un broadcast vers n'importe quel serveur
+Quel champ un relais DHCP renseigne-t-il, et à quoi sert-il ?	giaddr, son adresse sur le segment du client : c'est ce qui indique au serveur dans quel scope piocher
+Que contient l'option DHCP 3 ?	La passerelle par défaut (router)
+Que contient l'option DHCP 55 ?	La parameter request list : les options que le client réclame
+Quelle adresse prend un client resté sans réponse DHCP ?	Une adresse APIPA dans 169.254.0.0/16
+Différence entre SNAT et DNAT ?	Le SNAT réécrit l'adresse source (trafic sortant), le DNAT réécrit la destination (trafic entrant)
+Qu'est-ce que le PAT ?	Un SNAT qui réécrit aussi le port source, pour multiplexer plusieurs hôtes derrière une seule IP publique
+Combien de ports sont utilisables par IP publique et par destination unique en PAT ?	Environ 64 512 (1024 à 65535)
+Sur quoi porte l'unicité d'une entrée de table NAT ?	Le 5-uplet : protocole, IP source, port source, IP destination, port destination
+Timeout conntrack par défaut d'une connexion TCP établie sous Linux ?	432 000 secondes, soit 5 jours
+Différence de granularité entre un load balancer L4 et un L7 ?	Le L4 répartit des connexions, le L7 répartit des requêtes
+Pourquoi un load balancer L4 répartit-il mal du trafic gRPC ?	gRPC multiplexe toutes ses requêtes dans une seule connexion HTTP/2 : une fois placée sur un backend, toute la charge y reste
+Combien de connexions TCP un load balancer L7 maintient-il pour un client ?	Deux : une avec le client, une avec le backend, terminées de chaque côté
+Quel algorithme de répartition choisir quand les durées de requête sont très variables ?	Least connections
+Quel pourcentage de clés change quand on passe de 10 à 11 backends en hash mod N ?	Environ 91 % : seul 1/11 des clés reste en place
+Quel pourcentage de clés bouge quand on ajoute un 11e backend en hachage cohérent ?	Environ 9 %, soit 1/(N+1)
+Formule du temps de détection d'un backend mort par health check actif ?	Environ interval × fall, plus le timeout du dernier check
+Pourquoi un /healthz ne doit-il jamais tester la base de données ?	Une panne de cette dépendance partagée ferait échouer tous les backends en même temps et le LB les éjecterait tous
+Timeout d'inactivité par défaut d'un ALB AWS ?	60 secondes
+Timeout d'inactivité par défaut d'un NLB AWS ?	350 secondes
+Que réécrit un load balancer en DSR de niveau 2 ?	Uniquement l'adresse MAC de destination : les adresses IP source et destination restent inchangées
+Pourquoi un serveur en DSR porte-t-il la VIP sur sa loopback ?	Pour accepter les paquets destinés à la VIP sans répondre aux ARP la concernant (arp_ignore=1, arp_announce=2)
+Quel code HTTP renvoie un load balancer quand aucun backend n'est sain ?	503 (502 = amont injoignable, 504 = amont trop lent)
+Comment un backend retrouve-t-il l'IP du client derrière un load balancer L4 ?	Avec le PROXY protocol, v1 texte ou v2 binaire, à activer des deux côtés
+Que change externalTrafficPolicy: Local sur un Service Kubernetes ?	Il préserve l'IP source du client mais ne route que vers les pods du nœud d'entrée, donc déséquilibre
+Plage de ports par défaut d'un NodePort Kubernetes ?	30000-32767
+Combien d'octets l'encapsulation VXLAN retire-t-elle au MTU ?	50 octets : un MTU de 1500 tombe à 1450 pour les pods

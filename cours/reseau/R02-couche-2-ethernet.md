@@ -89,7 +89,7 @@ CRC-32 de contrôle. L'**IFG** est un silence obligatoire entre deux trames.
 | Payload max = **MTU** | **1500 octets** |
 | Overhead L2 pur | **18 octets** (6+6+2+4) |
 | Overhead total sur le fil | **38 octets** (18 + 8 préambule/SFD + 12 IFG) |
-| IFG | 96 temps-bit = 12 octets = 9,6 ns à 1 Gbit/s |
+| IFG | 96 temps-bit = 12 octets = 96 ns à 1 Gbit/s (9,6 µs à 10 Mbit/s) |
 
 **Pourquoi 64 octets minimum ?** Héritage de CSMA/CD : une station devait détecter une collision *pendant*
 qu'elle émettait encore. Le temps aller-retour sur le plus grand segment autorisé valait 512 temps-bit
@@ -822,7 +822,7 @@ switch), `2 balance-xor`, **`4 802.3ad` = LACP**, `5/6 balance-tlb/alb`. État c
 | Encapsulation | Overhead | MTU interne si underlay = 1500 |
 |---|---|---|
 | VLAN 802.1Q | 4 o | 1500 (le tag ne mange pas le payload) |
-| **VXLAN** (Eth 14 + IP 20 + UDP 8 + VXLAN 8) | **50 o** | **1450** |
+| **VXLAN** (Eth interne 14 + VXLAN 8 + UDP 8 + IP 20) | **50 o** | **1450** |
 | Geneve | 50 o + options | ≤ 1450 |
 | IPIP / GRE | 20 o / 24 o | 1480 / 1476 |
 | **WireGuard** | 60 o | **1420** |
@@ -1055,7 +1055,8 @@ partitions ; les petites passent.
 
 **1) Taille d'un paquet de 1500 octets une fois encapsulé ?**
 ```
-   1500 (paquet interne) + 14 (Eth externe) + 20 (IP externe) + 8 (UDP) + 8 (VXLAN) = 1550
+   1500 (paquet IP interne) + 14 (en-tête Eth interne, encapsulé) + 8 (VXLAN) + 8 (UDP) + 20 (IP externe) = 1550
+   → c'est la taille du PAQUET IP EXTERNE ; l'en-tête Ethernet externe, lui, ne compte pas dans le MTU.
    L'underlay accepte 1500 → 1550 > 1500 → le paquet est JETÉ.
 ```
 **2) Pourquoi les petits transferts marchent ?** Le handshake TCP et les petites requêtes tiennent sous la

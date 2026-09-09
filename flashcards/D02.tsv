@@ -1,0 +1,45 @@
+Quelle API du noyau utilise iproute2 la ou net-tools lit /proc ?	Netlink (socket AF_NETLINK, famille NETLINK_ROUTE) ; ss utilise sock_diag
+Difference entre le flag UP et le flag LOWER_UP d'une interface ?	UP = etat administratif (interface allumee). LOWER_UP = porteuse physique presente. UP sans LOWER_UP = NO-CARRIER
+RX errors contre RX dropped : que distinguent-ils ?	errors = trame abimee (CRC, cable, duplex). dropped = trame saine jetee par l'hote (buffer plein, VLAN inconnu, backlog)
+Que casse-t-on en configurant 10.0.1.12/32 au lieu de 10.0.1.12/24 ?	La route connectee vers 10.0.1.0/24 n'est plus installee : plus aucun voisin du LAN, meme la passerelle, n'est joignable
+Dans ip neigh, une entree STALE est-elle un probleme ?	Non : valide mais non confirmee recemment, le noyau l'utilise telle quelle. Les etats alarmants sont FAILED et INCOMPLETE persistant
+Valeurs par defaut de gc_thresh1 / gc_thresh2 / gc_thresh3 de la table de voisinage ?	128 / 512 / 1024 ; au-dela : neighbour table overflow
+Dans quel ordre le noyau choisit-il une route ?	1. longest prefix match  2. metrique la plus basse a prefixe egal  3. ECMP
+Route 10.0.0.0/8 metric 10 et route 10.0.1.0/24 metric 500 : laquelle pour 10.0.1.77 ?	La /24, malgre sa metrique : le longest prefix match tranche avant toute metrique
+Quelle commande donne la decision de routage reelle du noyau, regles comprises ?	ip route get <destination> (elle affiche aussi l'IP source qui sera choisie)
+Sur un socket LISTEN, que representent Recv-Q et Send-Q dans ss ?	Recv-Q = accept queue courante (connexions etablies en attente d'accept). Send-Q = capacite max = min(backlog de listen, somaxconn)
+Sur un socket ESTABLISHED, que representent Recv-Q et Send-Q ?	Recv-Q = octets recus non lus par l'application. Send-Q = octets envoyes non acquittes par le pair
+Quel compteur nstat confirme un debordement d'accept queue ?	TcpExtListenOverflows (et TcpExtListenDrops)
+Beaucoup de sockets CLOSE_WAIT sur ma machine : chez qui est le bug ?	Chez moi : mon application a recu un FIN et n'appelle jamais close(). Les descripteurs fuient jusqu'a EMFILE
+Comment se calcule le debit affiche par le champ send de ss -ti ?	cwnd x mss x 8 / rtt
+Ou tcpdump capture-t-il en reception par rapport a Netfilter ?	Avant Netfilter : on voit le paquet meme s'il va etre droppe, avec les adresses d'avant le DNAT
+Ou tcpdump capture-t-il en emission par rapport au NAT ?	Apres POSTROUTING : les adresses affichees sont deja traduites par le SNAT/MASQUERADE
+Quel filtre BPF n'attrape que les tentatives de connexion (SYN purs) ?	tcp[tcpflags] == tcp-syn
+Snaplen par defaut de tcpdump ?	262144 octets (le paquet entier)
+tcpdump affiche length 4344 sur une interface a MTU 1500 : pourquoi ?	GRO/TSO : la carte agrege ou segmente et tcpdump est du cote noyau de l'offload. ethtool -K eth0 gro off gso off tso off
+Quels sont les 5 crochets Netfilter ?	PREROUTING, INPUT (LOCAL_IN), FORWARD, OUTPUT (LOCAL_OUT), POSTROUTING
+Priorites des tables raw, conntrack, mangle, nat-dnat, filter, nat-snat ?	-300, -200, -150, -100, 0, +100
+Pourquoi le DNAT est-il obligatoirement en PREROUTING ?	Il change la destination : il doit avoir lieu avant la decision de routage, sinon le noyau route vers la mauvaise cible
+Pourquoi le SNAT est-il obligatoirement en POSTROUTING ?	Il change la source, et l'adresse a poser depend de l'interface de sortie, donc du routage deja effectue
+Une regle de la table nat s'applique-t-elle a chaque paquet d'une connexion ?	Non, seulement au premier (etat NEW) ; conntrack rejoue ensuite la meme traduction dans les deux sens
+Timeout par defaut d'une connexion TCP etablie dans conntrack ?	432 000 s, soit 5 jours (nf_conntrack_tcp_timeout_established)
+Combien de memoire noyau consomme approximativement une entree conntrack ?	Environ 300 octets, soit environ 300 Mo pour un million d'entrees
+Difference entre SNAT et MASQUERADE ?	SNAT pose une IP fixe fournie a l'avance. MASQUERADE prend l'IP courante de l'interface de sortie et purge conntrack quand elle tombe
+Adresse et masque du bridge docker0 par defaut ?	172.17.0.1/16
+Pourquoi une regle DROP en INPUT ne protege-t-elle pas un port publie par Docker ?	Le DNAT en PREROUTING envoie le paquet en FORWARD, pas en INPUT. Il faut ecrire la regle dans la chaine DOCKER-USER
+Sur quelle interface est configuree l'adresse ClusterIP d'un Service Kubernetes ?	Aucune : c'est uniquement une regle DNAT installee par kube-proxy sur chaque noeud
+Probabilite de la k-ieme regle d'un service kube-proxy en mode iptables pour N endpoints ?	1 / (N - k + 1), ce qui donne 1/N a chacun au final
+Qu'isole precisement un network namespace ?	Interfaces, adresses, routes, table ARP, espace de ports, regles netfilter, table conntrack, /proc/net et les sysctl net.*
+Quelle etape oubliee laisse une veth en NO-CARRIER dans un namespace ?	Ne pas monter le bout reste sur l'hote : une veth n'a de porteuse que si ses deux extremites sont UP
+Que fait exactement net.ipv4.ip_forward=1 ?	Il autorise le noyau a relayer un paquet dont la destination n'est pas une adresse locale, au lieu de le jeter
+Valeur par defaut de net.core.somaxconn depuis le noyau 5.4 ?	4096 (128 avant)
+Valeurs par defaut de net.ipv4.tcp_rmem ?	4096 131072 6291456 (min, defaut, max)
+Difference entre tcp_rmem et rmem_max ?	tcp_rmem pilote l'auto-tuning du noyau ; rmem_max plafonne ce qu'une appli peut demander via SO_RCVBUF. Un SO_RCVBUF explicite desactive l'auto-tuning
+Que mesurent les trois lettres de la methode USE ?	Utilisation, Saturation, Erreurs, pour chaque ressource (CPU, memoire, disque, reseau)
+Pourquoi un load average de 40 ne prouve-t-il pas une saturation CPU sous Linux ?	Le load Linux compte aussi les processus en etat D (attente disque ininterruptible), pas seulement les runnables
+Dans vmstat, que signalent les colonnes si et so non nulles ?	Du swap in/out : la machine manque de memoire et la latence va s'effondrer. Ces colonnes doivent rester a 0
+Pourquoi %util a 100 % dans iostat ne prouve-t-il pas qu'un NVMe est sature ?	%util mesure le temps avec au moins une requete en vol ; un NVMe traite des dizaines de requetes en parallele. Lire await et aqu-sz
+Quelle commande resout un nom exactement comme le fait une application ?	getent hosts <nom> : elle passe par NSS, donc /etc/hosts puis le DNS, contrairement a dig
+Que vaut l'option ndots dans resolv.conf par defaut, et en Kubernetes ?	1 par defaut, 5 en Kubernetes, ce qui provoque jusqu'a 8 requetes DNS pour un nom externe
+Dans mtr, 40 % de perte a un saut intermediaire et 0 % au saut final : verdict ?	Aucun probleme : ce routeur limite le debit de ses reponses ICMP. Seule la derniere ligne mesure la vraie perte
+Difference de diagnostic entre Connection refused et Connection timed out ?	refused = un RST est revenu, la pile distante repond mais rien n'ecoute. timed out = aucune reponse, un DROP ou un trou de routage

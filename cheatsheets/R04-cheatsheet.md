@@ -65,7 +65,7 @@ Changer une AD : `distance ospf intra-area 90` · `distance 200 <source> <wildca
 |---|---|
 | `unicast` (défaut) | Route normale |
 | `blackhole` | Jette, **aucun ICMP** |
-| `unreachable` | Jette + ICMP **type 3 code 0** |
+| `unreachable` | Jette + ICMP **type 3 code 1** (*host unreachable*) |
 | `prohibit` | Jette + ICMP **type 3 code 13** |
 | `throw` | Abandonne la table, passe à la règle suivante |
 | `local` / `broadcast` | Table `local`, gérées par le noyau |
@@ -326,7 +326,7 @@ clear ip ospf process              ! force une réélection DR (COUPE le trafic)
 | **IS-IS** | directement sur L2 | — | 115 |
 | **BFD** | UDP **3784** (control), 3785 (echo) | — | — |
 | **VRRP** | IP **112** | `224.0.0.18` | — |
-| **HSRP** | UDP 1985 (v1) / 2029 (v2) | `224.0.0.2` / `224.0.0.102` | — |
+| **HSRP** | UDP **1985** (v1 et v2 IPv4) · 2029 (v2 IPv6) | `224.0.0.2` / `224.0.0.102` | — |
 
 ## 16. Latence — ordres de grandeur
 

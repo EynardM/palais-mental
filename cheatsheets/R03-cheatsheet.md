@@ -191,7 +191,7 @@ ip.ip_address("2001:0db8:0000::1").compressed
 | GENEVE (~50 o) | ~1450 | ~1410 |
 | GRE (+24 o) | 1476 | 1436 |
 | IP-in-IP (+20 o) | 1480 | 1440 |
-| **WireGuard** (+60 o) | **1420** | 1380 |
+| **WireGuard** (+60 o IPv4 / +80 o IPv6) | 1440 · **1420** (défaut `wg-quick`) | 1400 · 1380 |
 | IPsec ESP tunnel | ~1440 | ~1400 |
 | **Minimum garanti IPv6** | **1280** | 1220 |
 

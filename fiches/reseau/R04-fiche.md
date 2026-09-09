@@ -32,7 +32,7 @@ FIB/CEF = ce qu'il *fait*.
 `src` = IP source quand la machine émet · `metric` défaut **0**.
 Tables : `local` **255** · `main` **254** · `default` **253**. Règles : 0 / 32766 / 32767.
 **`ip route get <IP>` = la décision** (`show` = la carte). Routage : `net.ipv4.ip_forward=1`.
-Spéciales : `blackhole` (silence) · `unreachable` (ICMP 3/0) · `prohibit` (ICMP 3/13) · `throw`. Cisco = `Null0`.
+Spéciales : `blackhole` (silence) · `unreachable` (ICMP 3/1) · `prohibit` (ICMP 3/13) · `throw`. Cisco = `Null0`.
 
 ## Table Cisco
 `O IA  10.3.0.0/16 [110/138] via 10.1.1.2, 00:09:02, Gi0/0` → **[AD / métrique]**, toujours cet ordre.

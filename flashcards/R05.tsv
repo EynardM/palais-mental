@@ -1,0 +1,45 @@
+Sur quel protocole de transport et quel port BGP fonctionne-t-il ?	TCP, port 179
+Taille de l'en-tête d'un message BGP ?	19 octets : Marker 16 + Length 2 + Type 1
+Hold time BGP par défaut ?	90 secondes
+Intervalle de keepalive BGP par défaut ?	30 secondes, soit le hold time divisé par 3
+Que signifie l'état BGP « Active » ?	Un état d'ÉCHEC : le routeur tente la connexion TCP sans y parvenir
+Dans quel état BGP les messages UPDATE circulent-ils ?	Established, et lui seul
+Code et sous-code NOTIFICATION quand la limite maximum-prefix est atteinte ?	Code 6 (Cease), sous-code 1 (Maximum Prefixes)
+Plage des numéros d'AS privés sur 16 bits ?	64512 à 65534
+À quoi sert l'AS 23456 ?	AS_TRANS : substitut d'un ASN 32 bits pour un pair qui ne comprend que 16 bits
+Comment BGP détecte-t-il les boucles de routage ?	Il rejette toute annonce dont l'AS_PATH contient déjà son propre ASN
+Distances administratives d'eBGP et d'iBGP sur Cisco ?	eBGP 20, iBGP 200
+Pourquoi un maillage complet iBGP est-il obligatoire ?	Une route apprise d'un pair iBGP n'est jamais réannoncée à un autre pair iBGP
+Combien de sessions dans un full mesh iBGP de n routeurs ?	n(n−1)/2
+Que fait la commande next-hop-self ?	Le routeur de bordure remplace le NEXT_HOP par sa propre adresse avant de transmettre en iBGP
+Valeur par défaut de LOCAL_PREF ?	100
+LOCAL_PREF : la plus grande ou la plus petite valeur gagne ?	La plus GRANDE
+MED : quelle valeur gagne, et quel est le défaut ?	La plus PETITE ; défaut 0
+Quelle restriction s'applique par défaut à la comparaison du MED ?	Il n'est comparé qu'entre chemins reçus du MÊME AS voisin
+Le WEIGHT est-il un attribut BGP ?	Non : valeur propriétaire Cisco, locale au routeur, jamais transmise
+Ordre de préférence des valeurs de l'attribut ORIGIN ?	IGP (0) < EGP (1) < INCOMPLETE (2) : le plus petit gagne
+Dans show ip bgp, que signifient respectivement le « * » et le « > » ?	« * » = route valide (next-hop joignable), « > » = meilleur chemin retenu
+Quel est le 1er critère de sélection du meilleur chemin, après la validité du next-hop ?	Le WEIGHT le plus grand
+Quel est le 2e critère de sélection du meilleur chemin BGP ?	La LOCAL_PREF la plus grande
+À quelle position l'AS_PATH intervient-il dans la sélection du meilleur chemin ?	En 4e position
+Que désigne le « hot potato routing » ?	Sortir de son propre AS au plus vite, par le point de sortie le plus proche au sens IGP
+Valeur de la community BLACKHOLE ?	65535:666 (RFC 7999)
+Différence entre NO_EXPORT et NO_ADVERTISE ?	NO_EXPORT : ne sort pas de l'AS. NO_ADVERTISE : réannoncée à aucun voisin, même interne
+Un route reflector reçoit une route d'un NON-client : vers qui la réfléchit-il ?	Vers les clients uniquement
+Différence entre transit et peering ?	Transit : accès payant à tout Internet. Peering : accès gratuit au pair et à ses clients seulement
+LOCAL_PREF typiques appliquées aux routes de client, de peer et de transit ?	Client 200 > peer 100 > transit 50
+Différence entre une fuite de routes et un détournement BGP ?	Fuite : mauvaise DIRECTION de propagation. Détournement : mauvaise ORIGINE du préfixe
+Pourquoi un détournement par préfixe plus spécifique gagne-t-il toujours ?	Le longest prefix match de la table de routage s'applique avant l'algorithme de sélection BGP
+Longueur maximale de préfixe généralement acceptée sur Internet en IPv4 ?	/24 (et /48 en IPv6)
+Que contient un ROA ?	Le préfixe, la maxLength autorisée, et l'ASN d'origine autorisé
+Quels sont les trois verdicts de la validation d'origine RPKI ?	VALID, INVALID, NOT FOUND
+Sur quel port travaille le protocole RTR (validateur vers routeur) ?	TCP 323
+RPKI protège-t-il contre les fuites de routes ?	Non : une fuite conserve une origine légitime, le ROA la valide
+Combien d'octets ajoute un label MPLS ?	4 octets par label empilé
+Que signifie le label MPLS 3 ?	Implicit NULL : « dépile le label avant de me l'envoyer », ce qui déclenche le PHP
+Sur quels ports LDP fonctionne-t-il ?	UDP 646 pour la découverte, TCP 646 pour la session
+À quoi sert le Route Distinguisher (RD) ?	Uniquement à rendre le préfixe unique dans MP-BGP ; il ne décide d'aucun import
+À quoi sert le Route Target (RT) ?	À contrôler l'import et l'export des routes entre VRF : c'est lui qui construit la topologie du VPN
+Combien de labels porte un paquet de VPN L3 MPLS, et à quoi servent-ils ?	Deux : l'externe pour le transport jusqu'au PE distant, l'interne pour désigner la VRF de livraison
+Combien d'octets ajoute une encapsulation VXLAN ?	50 octets, d'où le MTU 1450 courant des CNI Kubernetes
+Que faut-il faire quand un cluster Calico dépasse une centaine de nœuds ?	Désactiver le node-to-node mesh et déployer des route reflectors

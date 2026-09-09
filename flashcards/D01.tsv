@@ -1,0 +1,45 @@
+Que valent les descripteurs de fichiers 0, 1 et 2 ?	0 = stdin, 1 = stdout, 2 = stderr
+Quel descripteur la redirection '> fichier' redirige-t-elle ?	Uniquement le 1 (stdout) ; stderr continue d'aller a l'ecran
+Pourquoi 'cmd 2>&1 > f' ne met-il pas les erreurs dans f ?	2>&1 copie la destination ACTUELLE de 1, le terminal ; le deplacement de 1 vient apres. Forme correcte : cmd > f 2>&1
+Taille du tampon d'un tube (pipe) sous Linux ?	64 Kio
+Quel signal recoit un processus qui ecrit dans un tube dont le lecteur est parti, et quel code de sortie ?	SIGPIPE (13), code de sortie 141
+Pourquoi un script Python en conteneur n'affiche-t-il ses logs que par paquets ?	stdout n'est plus un tty : la libc bufferise par blocs de 4 Kio. Correctif : PYTHONUNBUFFERED=1 ou python -u
+Que retourne fork() dans le processus enfant ?	0. Le parent recoit le PID de l'enfant, et -1 en cas d'echec.
+Le PID change-t-il apres un execve() ?	Non : meme PID, meme parent, memes descripteurs ; seul le programme en memoire est remplace
+Que signifie l'etat D dans ps ?	Sommeil non interruptible (E/S dans le noyau) : immunise a kill -9 et compte dans la charge moyenne
+Qu'est-ce qu'un processus zombie ?	Un enfant termine dont le parent n'a pas encore appele wait(). Il ne consomme qu'un PID et une entree de table.
+Peut-on tuer un zombie avec kill -9 ?	Non, il est deja mort. Il faut que le parent appelle wait(), ou tuer le parent.
+Qu'arrive-t-il a un processus orphelin ?	Il est re-adopte par PID 1, qui moissonne les enfants. C'est le fonctionnement normal.
+Numeros de SIGHUP, SIGKILL et SIGTERM ?	SIGHUP 1, SIGKILL 9, SIGTERM 15
+Quels sont les deux seuls signaux qu'on ne peut ni rattraper ni bloquer ni ignorer ?	SIGKILL (9) et SIGSTOP (19)
+Comment calcule-t-on le code de sortie d'un processus tue par un signal ?	128 + numero du signal
+Que signifie un code de sortie 137 ?	128 + 9 : tue par SIGKILL, presque toujours par l'OOM killer
+Que signifie un code de sortie 143 ?	128 + 15 : tue par SIGTERM, donc un arret demande
+A quoi sert conventionnellement SIGHUP sur un demon ?	A lui faire relire sa configuration sans coupure (nginx, rsyslog, HAProxy)
+Delai de grace par defaut de 'docker stop' avant SIGKILL ?	10 secondes
+Delai de grace par defaut de Kubernetes avant SIGKILL ?	30 secondes (terminationGracePeriodSeconds)
+Delai d'arret par defaut d'un service systemd ?	90 secondes (TimeoutStopSec)
+Pourquoi une application PID 1 dans un conteneur ignore-t-elle SIGTERM ?	Le noyau n'applique pas les actions par defaut des signaux a PID 1 : sans handler, le signal est ignore. Remede : --init ou tini.
+Valeurs octales de r, w et x ?	r = 4, w = 2, x = 1
+Que permet le bit x sur un repertoire ?	Le traverser : y entrer et ouvrir un element dont on connait le nom. Requis sur TOUS les repertoires du chemin.
+Mode d'un fichier et d'un repertoire crees avec umask 022 ?	Fichier 644, repertoire 755
+Mode d'un fichier et d'un repertoire crees avec umask 027 ?	Fichier 640, repertoire 750
+Valeurs octales de setuid, setgid et sticky ?	setuid 4, setgid 2, sticky 1 (quatrieme chiffre : 4000, 2000, 1000)
+Que fait le bit setgid sur un repertoire ?	Les fichiers crees dedans heritent du GROUPE du repertoire : la solution du repertoire partage (mode 2775)
+Que fait le sticky bit sur un repertoire, et ou le voit-on tous les jours ?	Seul le proprietaire d'un fichier peut le supprimer. Sur /tmp, en mode 1777 (drwxrwxrwt).
+Combien de champs contient une ligne de /etc/passwd, et lesquels ?	7 : nom, x, UID, GID, GECOS, repertoire personnel, shell
+Pourquoi 'usermod -G data alice' est-il dangereux ?	Sans -a il REMPLACE tous les groupes secondaires au lieu d'en ajouter un
+Que signifie Type=simple dans une unit systemd ?	Le service est considere demarre des le execve ; le processus doit rester au premier plan
+Difference entre Requires= et After= dans systemd ?	Requires = dependance (l'unite doit etre active), After = ordre de demarrage. Un Requires seul lance les deux en parallele.
+Quelle commande est obligatoire apres avoir modifie un fichier .service ?	systemctl daemon-reload
+Que fait Persistent=true dans un timer systemd ?	Rattrape l'execution manquee si la machine etait eteinte a l'heure prevue
+Difference entre RSS et VSZ ?	VSZ = espace d'adressage virtuel reserve ; RSS = pages reellement en RAM. Seul le RSS coute de la memoire physique.
+Quelle colonne de 'free -h' faut-il lire, et pourquoi pas 'free' ?	available : ce qu'une application peut obtenir sans swapper. Le page cache compte comme recuperable.
+Difference entre OutOfMemoryError et OOMKilled ?	OutOfMemoryError = exception Java avec stack trace, la JVM vit. OOMKilled = SIGKILL du noyau, code 137, aucun log applicatif.
+Que signifie 'Memory cgroup out of memory' dans dmesg ?	Le conteneur a depasse SA limite (memory.max), pas la memoire de la machine
+Valeur par defaut de spark.executor.memoryOverhead ?	max(384 Mio, 10 % de la memoire de l'executeur), a ajouter a limits.memory
+df affiche 100 %, du ne trouve rien : hypothese principale et commande ?	Un fichier supprime mais encore ouvert par un processus. Commande : lsof +L1
+'No space left on device' alors qu'il reste de la place : cause et commande ?	Les inodes sont epuises. Verifier avec df -i.
+Combien d'inodes ext4 cree-t-il par defaut, et quand ?	1 inode pour 16 Kio de capacite, fixe definitivement au mkfs
+Difference entre mtime et ctime ?	mtime = derniere modification du contenu ; ctime = derniere modification de l'inode, donc contenu OU metadonnees (chmod inclus)
+Que signifie une valeur elevee dans la colonne 'wa' de top ?	Le CPU attend des E/S : le goulot est le disque ou le reseau, pas le processeur

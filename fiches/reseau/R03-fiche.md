@@ -103,7 +103,7 @@ Ping : payload **56 o** → 84 o de paquet IP. Traceroute Unix : UDP **33434+**,
 ## MTU / MSS
 
 `MSS = MTU − 40` (IPv4) → **1460** · `MSS = MTU − 60` (IPv6) → **1440**.
-Overheads : **VXLAN 50 → 1450** · GRE 24 → 1476 · IP-in-IP 20 → 1480 · WireGuard 60 → **1420** · PPPoE → 1492.
+Overheads : **VXLAN 50 → 1450** · GRE 24 → 1476 · IP-in-IP 20 → 1480 · WireGuard 60 (IPv4) → 1440, **1420** par défaut (`wg-quick` retire 80 o, marge IPv6) · PPPoE → 1492.
 Test : `ping -M do -s 1472 cible` (1472 + 8 + 20 = 1500). Correctif : MSS clamping ou MTU abaissé.
 **Signature du trou noir PMTU** : handshake OK, petites requêtes OK, **gros transferts figés**.
 

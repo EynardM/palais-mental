@@ -130,8 +130,9 @@ distincte. Un seul fournisseur = tu n'as pas besoin d'AS, ton fournisseur annonc
 
 ### 2.3 Les numéros d'AS : 16 bits, puis 32
 
-À l'origine, un ASN tient sur **16 bits** : 0 à 65 535. Épuisé au milieu des années 2000. RFC 6793 a
-étendu le champ à **32 bits** : 0 à 4 294 967 295.
+À l'origine, un ASN tient sur **16 bits** : 0 à 65 535. Réserve épuisée au cours des années 2010 (le
+RIPE NCC n'alloue plus aucun ASN 16 bits depuis fin 2018). RFC 6793 a étendu le champ à **32 bits** :
+0 à 4 294 967 295.
 
 | Plage | Bits | Usage |
 |---|---|---|
@@ -811,8 +812,11 @@ Chaque opérateur publie sa propre grille. Le motif est presque toujours le mêm
 
 **Pour toi, data engineer :** AWS Direct Connect utilise exactement ce mécanisme. Sur une *public virtual
 interface*, tu tags tes annonces avec `7224:7100` / `7224:7200` / `7224:7300` pour demander un local pref
-bas / moyen / haut côté Amazon, et `7224:8100` / `7224:8200` pour limiter la portée à la région locale ou
-au continent. C'est ta seule prise pour influencer le trafic **entrant** depuis AWS.
+bas / moyen / haut côté Amazon, et `7224:9100` / `7224:9200` / `7224:9300` pour limiter la portée de tes
+propres préfixes à la région locale, au continent ou au monde entier. Dans l'autre sens, ce sont **AWS
+qui étiquette ses annonces vers toi** avec `7224:8100` (routes de la même région) et `7224:8200` (routes
+du même continent) — à toi de les filtrer. C'est ta seule prise pour influencer le trafic **entrant**
+depuis AWS.
 
 ---
 
@@ -1230,8 +1234,8 @@ Un **LSP** (*Label Switched Path*) est un tunnel unidirectionnel de bout en bout
 
 ```
    PE1 ──────► P1 ──────► P2 ──────► PE2 ──────► destination
-   PUSH 100    SWAP       SWAP       POP
-               100→200    200→3
+   PUSH 100    SWAP       POP        lookup IP normal
+               100→200    (PE2 lui a annoncé le label 3)
 
    Paquet sur le fil :
    PE1→P1 : [Eth][L=100][IP]
@@ -1503,7 +1507,7 @@ reconnaître.
       Network          Next Hop        Metric LocPrf Weight Path
    *>i203.0.113.0/24   10.0.0.1            0    150      0 200 300 i
    *  203.0.113.0/24   10.0.0.2            0    100      0 200 400 500 i
-   *  198.51.100.0/24  10.0.0.2           30    100      0 200 i
+   *> 198.51.100.0/24  10.0.0.2           30    100      0 200 i
 
       │││
       ││└── i = apprise en iBGP (rien = eBGP)

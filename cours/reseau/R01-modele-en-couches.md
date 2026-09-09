@@ -143,7 +143,7 @@ OSI décrit. TCP/IP fonctionne. Le modèle TCP/IP (aussi appelé modèle DoD, ou
 | Internet | 3 | Réseau |
 | Accès réseau | 1 + 2 | Liaison / Link |
 
-> 🧠 **MÉMO** — TCP/IP = **« 1-1-1-3 »** en partant du bas : la couche basse regroupe **2** couches OSI (1+2), puis 1 pour 1 (Internet↔3, Transport↔4), puis la couche haute regroupe **3** couches OSI (5+6+7). Le compte tombe : 2+1+1+3 = 7.
+> 🧠 **MÉMO** — TCP/IP = **« 2-1-1-3 »** en partant du bas : la couche basse regroupe **2** couches OSI (1+2), puis 1 pour 1 (Internet↔3, Transport↔4), puis la couche haute regroupe **3** couches OSI (5+6+7). Le compte tombe : 2+1+1+3 = 7.
 
 > ⚠️ **PIÈGE** — On voit parfois un « modèle TCP/IP à 5 couches » qui sépare physique et liaison. Ce n'est pas faux, c'est un modèle pédagogique hybride. Si on te pose la question en entretien : **le modèle TCP/IP de référence (RFC 1122) en a 4**. Mentionne la variante à 5 pour montrer que tu le sais.
 
@@ -756,7 +756,7 @@ Le switch lit la MAC destination `RR:...:01`, la trouve dans sa table CAM sur le
   IP  src     10.0.1.10                -->     10.0.1.10                  IDENTIQUE
   IP  dst     10.0.2.20                -->     10.0.2.20                  IDENTIQUE
   TTL         64                       -->     63                         −1
-  chk IP      0x1a2b                   -->     0x1a2c                     RECALCULÉ
+  chk IP      0x1a2b                   -->     0x1b2b                     RECALCULÉ
   Ports TCP   41522 -> 5432            -->     41522 -> 5432              IDENTIQUES
   Données     ...                      -->     ...                        IDENTIQUES
 ```

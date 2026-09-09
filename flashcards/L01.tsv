@@ -1,0 +1,44 @@
+Que fait `b = a` sur une liste Python ?	Colle une deuxième étiquette sur le MÊME objet : aucune copie
+Quelle est la plage des petits entiers mis en cache par CPython ?	De -5 à 256
+Complexité de `x in ma_liste` ?	O(n) : parcours élément par élément
+Complexité de `x in mon_set` ?	O(1) en moyenne : un hash puis un accès direct
+Que font `list(x)`, `x[:]` et `x.copy()` ?	Exactement la même chose : une copie SUPERFICIELLE (contenu partagé)
+Quand la valeur par défaut d'un paramètre est-elle évaluée ?	Une seule fois, à la DÉFINITION de la fonction (ligne du def)
+Correctif du piège `def f(x=[])` ?	def f(x=None) puis : if x is None: x = []
+Comment déclarer une liste par défaut dans une dataclass ?	field(default_factory=list)
+Depuis quelle version l'ordre d'insertion d'un dict est-il garanti par le langage ?	Python 3.7
+Taille d'un int Python comparée à un int64 NumPy ?	Environ 28 octets contre 8 octets
+Quel algorithme de tri utilise sorted() ?	Timsort : O(n log n), stable, O(n) sur données déjà triées
+Combien de RAM pour 1 Go de CSV chargé en objets Python ?	5 à 10 Go (facteur 5 à 10)
+Quelle exception marque la fin normale d'une itération ?	StopIteration
+Différence entre itérable et itérateur ?	L'itérable a __iter__ ; l'itérateur a __iter__ ET __next__, et s'épuise
+Que se passe-t-il si on parcourt un générateur une deuxième fois ?	Il ne rend rien, sans lever d'erreur : bug silencieux
+Que renvoie l'appel d'une fonction contenant yield ?	Un objet générateur ; aucune ligne du corps n'a été exécutée
+Différence entre [x for x in y] et (x for x in y) ?	Crochets : liste complète en mémoire. Parenthèses : générateur paresseux
+Quelle est la contrainte d'itertools.groupby ?	Il ne groupe que les éléments CONSÉCUTIFS : il faut trier avant
+Une closure capture-t-elle la valeur ou la variable ?	La variable : [lambda: i for i in range(3)] donne [2, 2, 2]
+À quoi sert functools.wraps ?	Recopier __name__, __doc__, __qualname__, __module__ du décoré sur le wrapper
+Quel est le maxsize par défaut de lru_cache ?	128
+Sur quelles erreurs seulement doit-on faire un retry ?	Les transitoires : timeout, connexion perdue, HTTP 429 et 5xx
+Les annotations de type sont-elles vérifiées à l'exécution par CPython ?	Non, jamais : la vérification est faite hors exécution par mypy ou pyright
+Que gagne-t-on avec @dataclass(slots=True) ?	Suppression du __dict__ : environ 30 à 40 % de RAM en moins
+Différence fondamentale entre dataclass et Pydantic ?	dataclass ne valide rien ; Pydantic valide et convertit à l'exécution
+Quelles exceptions n'héritent PAS d'Exception ?	SystemExit, KeyboardInterrupt et GeneratorExit (directement sous BaseException)
+Que fait `raise Neuve(...) from exc` ?	Chaîne les exceptions : conserve la cause d'origine dans __cause__
+Différence entre les blocs else et finally d'un try ?	else : seulement si aucune exception. finally : dans tous les cas
+À quoi sert le layout src/ dans un projet Python ?	Forcer les tests à importer le paquet INSTALLÉ, pas les fichiers locaux
+Quel fichier faut-il commiter pour un build reproductible ?	Le fichier de verrouillage : uv.lock ou poetry.lock
+Avec unittest.mock, où faut-il patcher un nom ?	Là où il est UTILISÉ (le module testé), pas là où il est défini
+Valeur numérique du niveau de log WARNING ?	30
+Quel est le niveau par défaut du logger racine ?	WARNING
+Pourquoi logger.info("x=%s", v) plutôt qu'une f-string ?	Formatage différé : la chaîne n'est construite que si le message passe les filtres
+Quel est l'encodage par défaut d'open() ?	Celui de la locale : UTF-8 sur Linux, souvent cp1252 sur Windows
+Quel argument d'open() est obligatoire avec le module csv ?	newline=""
+Que contient le footer d'un fichier Parquet ?	Le schéma plus les min/max/nombre de nuls par colonne et par row group
+Combien de fois un Parquet est-il plus petit qu'un CSV équivalent ?	5 à 10 fois
+Que garantit exactement le GIL ?	Un seul thread exécute du bytecode Python à la fois, par processus
+Quel est l'intervalle de bascule du GIL par défaut ?	5 ms (sys.getswitchinterval() = 0.005)
+Threads ou processus pour du parsing JSON en Python pur ?	Processus : le GIL sérialise tout calcul en Python pur
+Quel est le max_workers par défaut de ThreadPoolExecutor ?	min(32, os.cpu_count() + 4)
+Par quel mécanisme transitent les arguments d'un ProcessPoolExecutor ?	pickle — donc pas de lambda ni de fonction locale
+Quelle est la longueur de ligne par défaut de black et ruff format ?	88 colonnes

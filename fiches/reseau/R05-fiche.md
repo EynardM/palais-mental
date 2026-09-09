@@ -124,7 +124,7 @@ VPNv4 = RD 8 o + IPv4 4 o = **12 o**. MP-BGP **AFI 1 / SAFI 128**. EVPN = AFI 25
 
 ## Cloud
 
-DX/ExpressRoute/Interconnect = **BGP sur VLAN 802.1Q** · AWS public AS **16509** · Azure **12076** · DX communities `7224:7100/7200/7300` (local pref), `7224:8100/8200` (portée).
+DX/ExpressRoute/Interconnect = **BGP sur VLAN 802.1Q** · AWS public AS **16509** · Azure **12076** · DX communities `7224:7100/7200/7300` (local pref demandé à AWS), `7224:9100/9200/9300` (portée de TES annonces) ; `7224:8100/8200` = étiquettes posées PAR AWS sur ses propres annonces (région / continent).
 Calico : node-to-node mesh (= full mesh iBGP, AS 64512) → **RR au-delà de ~100 nœuds**. MetalLB BGP : annonce le VIP depuis n nœuds → **ECMP** ; ⚠ rehash à la panne casse les sessions.
 Données : **MRT** (fichiers RouteViews/RIS, différé) vs **BMP** (streaming routeur, pré-policy).
 

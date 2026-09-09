@@ -1,0 +1,45 @@
+Numero de protocole IP de TCP ?	6
+Numero de protocole IP d'UDP ?	17
+Plage de ports ephemeres par defaut sous Linux ?	32768 a 60999, soit 28 232 ports
+Qu'est-ce qui identifie une connexion TCP de facon unique ?	Le quadruplet : IP source, port source, IP destination, port destination
+Taille minimale et maximale d'un en-tete TCP ?	20 octets minimum, 60 octets maximum (dont 40 d'options)
+Taille de l'en-tete UDP ?	8 octets, fixe
+Les 8 flags TCP dans l'ordre des bits ?	CWR ECE URG ACK PSH RST SYN FIN
+Difference entre FIN et RST ?	FIN = fin d'emission, acquitte, l'autre sens reste ouvert. RST = abandon immediat, buffers jetes, jamais acquitte
+Que numerote le numero de sequence TCP ?	Des octets : la position du premier octet de charge utile dans le flux
+Un segment porte seq=4000 et len=1460. Quel ack le recepteur renvoie-t-il ?	5460
+Combien de numeros de sequence consomment SYN et FIN ?	1 chacun, bien qu'ils ne portent aucune donnee
+Quelles options TCP ne se negocient que dans le SYN ?	MSS (kind 2), Window Scale (kind 3) et SACK-permitted (kind 4)
+MSS TCP sur un Ethernet a MTU 1500 ?	1460 octets, ou 1448 avec l'option Timestamps
+Combien de RTT coute l'etablissement d'une connexion TCP ?	1 RTT avant le premier octet de donnees
+Combien de RTT pour TCP + TLS 1.3, et pour TCP + TLS 1.2 ?	2 RTT avec TLS 1.3, 3 RTT avec TLS 1.2
+Duree de TIME_WAIT sous Linux ?	60 secondes, codees en dur (TCP_TIMEWAIT_LEN), non reglables par sysctl
+Qui reste en TIME_WAIT apres une fermeture ?	Celui qui ferme en premier, la fermeture active
+Les deux raisons d'etre de TIME_WAIT ?	Pouvoir re-acquitter si le dernier ACK se perd, et laisser mourir les vieux segments avant reutilisation du quadruplet
+Combien de connexions courtes par seconde un client Linux peut-il ouvrir vers une meme destination ?	Environ 470 : 28 232 ports / 60 s de TIME_WAIT
+Que revele une accumulation de sockets en CLOSE_WAIT ?	Ton application n'appelle pas close() : fuite de descripteurs de fichiers
+Que revele un blocage en FIN_WAIT_2 ?	Le pair n'appelle pas close(). Timeout tcp_fin_timeout = 60 s
+Sur une socket LISTEN, que valent Recv-Q et Send-Q dans ss ?	Recv-Q = accept queue courante, Send-Q = sa taille maximale
+Sur une socket ESTABLISHED, que valent Recv-Q et Send-Q ?	Recv-Q = octets recus non lus par l'appli, Send-Q = octets envoyes non acquittes
+Valeur maximale du champ Fenetre TCP sans window scaling ?	65 535 octets
+Plage du facteur de window scaling ?	0 a 14, negocie dans le SYN uniquement
+Que protege rwnd, que protege cwnd ?	rwnd protege le buffer du recepteur, cwnd protege le reseau
+Que signifie un TCP ZeroWindow envoye par le serveur ?	Son application ne lit pas assez vite dans la socket : le reseau est hors de cause
+Formule du BDP ?	Bande passante x RTT (attention aux bits contre les octets)
+BDP d'un lien 10 Gbit/s avec 80 ms de RTT ?	100 Mo
+Debit d'une connexion a 80 ms de RTT sans window scaling ?	Environ 6,5 Mbit/s : 65 535 octets / 0,08 s
+Formule du debit atteignable en fonction de la fenetre ?	Debit = Fenetre / RTT
+Fenetre de congestion initiale (IW) sous Linux ?	10 MSS (RFC 6928)
+Que valent cwnd et ssthresh apres un timeout de retransmission ?	ssthresh = cwnd/2 puis cwnd = 1 MSS, retour en slow start
+Que valent cwnd et ssthresh apres 3 ACK dupliques ?	ssthresh = cwnd/2 puis cwnd = ssthresh : fast recovery, on reste en congestion avoidance
+Combien d'ACK dupliques declenchent un fast retransmit, et pourquoi ce nombre ?	3 : en dessous on confondrait avec un simple reordonnancement, frequent avec l'ECMP
+Algorithme de controle de congestion par defaut sous Linux ?	CUBIC
+Quelle grandeur BBR utilise-t-il a la place de la perte ?	La bande passante du goulot (BtlBw) et le RTT minimal (RTprop), dont le produit donne le BDP
+A quoi sert l'option SACK ?	Signaler les blocs recus hors sequence, pour ne retransmettre que les trous
+Valeurs par defaut du keepalive TCP sous Linux ?	7200 s d'inactivite, 75 s entre sondes, 9 sondes
+Une latence stable a exactement 40 ms par requete : cause et correctif ?	Interaction Nagle / delayed ACK, c'est un timer et pas le reseau. Correctif : TCP_NODELAY
+Handshake OK, petites requetes OK, gros transferts geles : diagnostic ?	Trou noir de PMTUD : MTU reduite sur le chemin et ICMP type 3 code 4 filtre
+Sur quel protocole et quel port QUIC fonctionne-t-il ?	UDP, port 443
+Combien de RTT coute un handshake QUIC ?	1 RTT (transport et TLS 1.3 fusionnes), 0 RTT en reprise de session
+A quoi sert le Connection ID de QUIC ?	Identifier la connexion independamment du quadruplet : changer de reseau ne la casse pas
+Quel taux de retransmission TCP est considere comme sain ?	Moins de 0,1 % de TcpRetransSegs / TcpOutSegs. Au-dela de 1 %, probleme reseau reel

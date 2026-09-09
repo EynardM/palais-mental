@@ -350,7 +350,7 @@ C'est le mécanisme de secours le plus simple et le plus utilisé du métier.
 
 ```bash
 ip route add blackhole 10.6.6.0/24        # jette en silence, aucun ICMP
-ip route add unreachable 10.7.7.0/24      # jette + ICMP type 3 code 0
+ip route add unreachable 10.7.7.0/24      # jette + ICMP type 3 code 1 (host unreachable)
 ip route add prohibit 10.8.8.0/24         # jette + ICMP type 3 code 13
 ip route add throw 10.9.9.0/24 table 100  # abandonne cette table, passe à la règle suivante
 ip route add 10.20.0.0/16 nexthop via 192.168.1.253 weight 1 \
@@ -501,9 +501,10 @@ C'est **la** machine à états à connaître par cœur — et l'objet du palais 
 
 ```
   DOWN
-   │ reçoit un Hello
+   │ (NBMA) je commence à solliciter un voisin configuré à la main
    ▼
   ATTEMPT   (NBMA uniquement : Hello unicast vers un voisin configuré)
+   │ je reçois un Hello — sur Ethernet on va de DOWN à INIT directement
    ▼
   INIT      j'ai reçu un Hello, mais je ne m'y vois pas encore
    │ je vois MON Router ID dans son Hello
@@ -685,14 +686,16 @@ voisin direct de la racine.
    Liens non orientés et coûts :
    A-B 1 · A-C 2 · B-C 2 · B-D 5 · B-G 2 · C-D 1 · C-E 3 · D-E 1 · D-F 6 · E-F 2
 
-            1        2
-      A ─────── B ─────── G
-      │         │
-    2 │       5 │
-      C ─────── D ─────── F
-        │  1    │    6    │
-      3 │     1 │         │ 2
-        └────── E ────────┘
+                   A
+               1 ╱   ╲ 2
+               ╱       ╲
+   G ───2─── B ────2──── C
+               ╲       ╱   ╲
+               5 ╲   ╱ 1     ╲ 3
+                   D ────1──── E
+                     ╲       ╱
+                     6 ╲   ╱ 2
+                         F
 ```
 
 Table de travail (`distance/parent`) :
@@ -726,8 +729,8 @@ par le nombre de **voisins directs**, jamais par le nombre de destinations.
 
 **Variante ECMP** : passe le coût A-C de 2 à **3**. Alors C vaut 3 via A **et** 3 via B (1+2) — égalité. OSPF
 installe **deux** chemins vers C, et **tout ce qui passe par C hérite des deux prochains sauts** : D (4), E (5), F (7)
-sortent en ECMP par B **et** C. Un seul lien recalculé, six routes changées — c'est la définition même de la
-sensibilité d'un IGP.
+sortent en ECMP par B **et** C. Un seul coût de lien modifié, **quatre routes sur six** changées (C, D, E et F ;
+B et G ne bougent pas) — c'est la définition même de la sensibilité d'un IGP.
 
 > ❓ **RETIENS ÇA** — Pourquoi Dijkstra peut-il figer définitivement le candidat de plus petite distance ?
 > <details><summary>→ réponse</summary><br>Parce que tout autre chemin vers lui devrait passer par un candidat de distance <b>supérieure ou égale</b>, donc serait au moins aussi long. Avec des coûts positifs, sa distance provisoire est déjà optimale.</details>

@@ -182,7 +182,8 @@ Ces trois champs ne servent qu'à une chose : découper un paquet trop gros et l
   D'où la contrainte : tout fragment sauf le dernier a une taille de données multiple de 8.
 
 > 🧠 **MÉMO** — **DF = « Défense de Fragmenter »**, **MF = « Msieur, y en a encore »**. Et l'offset se compte
-> en **paquets de 8** parce que 13 bits × 8 = 65 536, juste ce qu'il faut pour adresser tout le paquet.
+> en **paquets de 8** parce que 2¹³ × 8 = 65 536, juste ce qu'il faut pour adresser tout le paquet
+> (13 bits ne suffiraient pas seuls : 2¹³ = 8192 positions).
 
 **Exemple complet, à savoir refaire.** Un datagramme IPv4 de **4000 octets** (20 d'en-tête + 3980 de données)
 doit traverser un lien de **MTU 1500**.
@@ -941,7 +942,7 @@ l'option MSS dans le SYN pour que TCP ne demande jamais plus que ce qui passe. L
 | GRE | 24 o | 1476 |
 | IP-in-IP | 20 o | 1480 |
 | IPsec ESP (tunnel) | ~50-60 o | ~1440 |
-| WireGuard | 60 o (IPv4) | **1420** |
+| WireGuard | 60 o (IPv4) · 80 o (IPv6) | 1440 en IPv4 · **1420** = défaut `wg-quick` (marge IPv6) |
 | PPPoE | 8 o | 1492 |
 
 Et les MSS : **MSS = MTU − 40** en IPv4 (20 IP + 20 TCP) → **1460** sur Ethernet standard.

@@ -1,0 +1,45 @@
+Sur quel port et quel transport tourne HTTP/3 ?	QUIC sur UDP, port 443
+Combien d'octets fait l'en-tête d'une trame HTTP/2 ?	9 octets
+Valeur par défaut de SETTINGS_INITIAL_WINDOW_SIZE en HTTP/2 ?	65 535 octets
+Combien d'entrées contient la table statique HPACK ?	61
+En HTTP/2, les identifiants de flux impairs sont ouverts par qui ?	Le client (les pairs par le serveur, le 0 = la connexion)
+Pourquoi le pipelining HTTP/1.1 a-t-il échoué ?	Les réponses doivent revenir dans l'ordre : une lente bloque toutes les suivantes
+Combien de connexions TCP un navigateur ouvre-t-il par origine en HTTP/1.1 ?	6
+HTTP/2 supprime-t-il le head-of-line blocking de TCP ?	Non. Il supprime celui de l'application ; une perte TCP gèle toujours tous les flux
+Quel mécanisme de QUIC permet de survivre à un changement de réseau ?	Le Connection ID : la connexion n'est plus identifiée par le quadruplet IP/ports
+Pourquoi le 0-RTT ne doit-il servir qu'à des requêtes idempotentes ?	Les données précoces sont rejouables par un attaquant
+Débit maximal d'un flux HTTP/2 avec la fenêtre par défaut, à 100 ms de RTT ?	65 535 / 0,1 s = 655 Ko/s, soit environ 5,24 Mb/s
+Différence entre no-cache et no-store ?	no-cache : stocke mais revalide avant chaque usage. no-store : ne stocke nulle part
+Que renvoie un serveur quand If-None-Match correspond toujours ?	304 Not Modified, sans corps
+Quel code HTTP renvoie un If-Match qui ne correspond plus ?	412 Precondition Failed
+Différence entre 502 et 504 ?	502 : backend injoignable ou réponse illisible. 504 : backend joint mais trop lent
+Que signifie exactement le code 401 ?	Non authentifié (le nom Unauthorized est une erreur historique) ; 403 = non autorisé
+Quels codes de redirection conservent la méthode et le corps ?	307 (temporaire) et 308 (permanent)
+DELETE renvoie 404 au deuxième appel : est-il encore idempotent ?	Oui : l'idempotence porte sur l'état final du serveur, pas sur le code de réponse
+Comment marque-t-on la fin d'un corps en Transfer-Encoding: chunked ?	Un morceau de taille 0 (les tailles sont annoncées en hexadécimal)
+CORS protège-t-il le serveur ?	Non. Il est appliqué par le navigateur et protège l'utilisateur ; curl l'ignore totalement
+Access-Control-Allow-Credentials: true est incompatible avec quoi ?	Access-Control-Allow-Origin: * — il faut renvoyer l'origine exacte
+Quelle est la valeur SameSite par défaut des navigateurs modernes ?	Lax
+Que définit exactement une origine web ?	Schéma + hôte + port, les trois identiques
+Combien de RTT avant le premier octet applicatif en TCP + TLS 1.3 ?	2 RTT (1 TCP + 1 TLS) ; 3 avec TLS 1.2 ; 1 avec QUIC
+Où le serveur prouve-t-il qu'il possède la clé privée en TLS 1.2 ?	Dans la signature du ServerKeyExchange (CertificateVerify en TLS 1.3)
+Taille de l'en-tête d'un enregistrement TLS ?	5 octets (type 1 + version 2 + longueur 2)
+Taille maximale de la charge utile d'un enregistrement TLS ?	16 384 octets (2^14)
+Qu'est-ce que la Perfect Forward Secrecy ?	Voler la clé privée du serveur ne permet pas de déchiffrer le trafic passé (échange ECDHE éphémère)
+Combien de suites cryptographiques TLS 1.3 définit-il ?	5 (dont 3 réellement utilisées : AES_128_GCM_SHA256, AES_256_GCM_SHA384, CHACHA20_POLY1305_SHA256)
+Différence entre SNI et ALPN ?	SNI = le nom d'hôte demandé (choix du certificat). ALPN = le protocole applicatif négocié (h2, h3)
+Qu'a supprimé TLS 1.3 pour rendre la PFS obligatoire ?	L'échange de clés RSA statique
+Le CN d'un certificat est-il encore vérifié ?	Non, plus depuis Chrome 58 (2017) : seul le SAN compte
+Durée de validité maximale d'un certificat public ?	398 jours (90 jours chez Let's Encrypt)
+Cause la plus probable de « unable to get local issuer certificate » ?	Le serveur n'envoie pas le certificat intermédiaire (le navigateur le récupère via AIA, pas curl)
+Quelle alerte TLS correspond au numéro 48 ?	unknown_ca — l'autre bout ne fait pas confiance à ta CA (fréquent en mTLS)
+Qu'ajoute mTLS par rapport à TLS ?	CertificateRequest du serveur, puis Certificate + CertificateVerify du client
+À quoi ressemble une identité SPIFFE ?	spiffe://cluster.local/ns/<namespace>/sa/<service-account>, portée dans le SAN
+Quel code HTTP renvoie un appel gRPC en erreur ?	200 OK — le vrai code est dans les trailers grpc-status / grpc-message
+Quels sont les 4 types d'appel gRPC ?	Unaire, streaming serveur, streaming client, bidirectionnel
+Quel code gRPC est le seul rejoué d'office par les clients ?	14, UNAVAILABLE
+Comment se calcule la balise d'un champ protobuf ?	(numéro_de_champ << 3) | type_de_fil
+Pourquoi un load balancer L4 déséquilibre-t-il gRPC ?	gRPC multiplexe tout dans une connexion TCP persistante, épinglée à un seul backend
+Quel code de statut confirme l'ouverture d'un WebSocket ?	101 Switching Protocols
+Que signifie un code de fermeture WebSocket 1006 ?	Fermeture anormale, aucune trame close reçue — typiquement le timeout d'inactivité d'un load balancer
+Valeur par défaut de max_pool_connections dans boto3 ?	10

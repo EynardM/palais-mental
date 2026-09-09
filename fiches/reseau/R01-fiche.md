@@ -17,7 +17,7 @@
 
 ## Correspondance OSI ↔ TCP/IP (4 couches)
 
-| TCP/IP | OSI | Schéma « 1-1-1-3 » en partant du bas |
+| TCP/IP | OSI | Schéma « 2-1-1-3 » en partant du bas |
 |---|---|---|
 | Application | 5+6+7 | 3 couches OSI |
 | Transport | 4 | 1 |

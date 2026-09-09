@@ -1,0 +1,45 @@
+Dans quel ordre le shell fait-il le découpage en mots et le remplacement des variables ?	D'abord le remplacement de la variable, ENSUITE le découpage en mots sur IFS
+Quelle est la valeur par défaut d'IFS ?	Espace, tabulation, saut de ligne
+Combien d'étapes compte l'ordre d'expansion de bash, et quelle est la dernière ?	9 étapes ; la dernière est la suppression des quotes
+Différence entre "$@" et "$*" ?	"$@" = N mots, un par argument ; "$*" = 1 seul mot, joint par le 1er caractère d'IFS
+Que fait bash quand un glob ne correspond à aucun fichier ?	Il laisse le motif littéral (d'où shopt -s nullglob pour obtenir une liste vide)
+Que signifie set -e ?	Le script quitte à la première commande qui retourne un code différent de 0
+Pourquoi local v=$(cmd) masque-t-il l'échec de cmd sous set -e ?	Le code de retour de la ligne est celui de 'local', qui vaut toujours 0
+Pourquoi ((i++)) tue-t-il un script sous set -e quand i vaut 0 ?	Le post-incrément renvoie l'ancienne valeur 0, donc (( )) retourne le code 1
+Que fait set -o pipefail ?	Le code du pipeline devient celui de la dernière commande ayant échoué, au lieu du dernier maillon
+Sans pipefail, que vaut le code de 'commande_qui_echoue | tee log' ?	0, le code de tee
+Que contient la variable PIPESTATUS ?	Un tableau des codes de retour de chaque maillon du dernier pipeline
+À quoi sert set -E (errtrace) ?	À faire hériter le trap ERR par les fonctions, sous-shells et substitutions de commande
+Que donne ${f##*/} ?	Le nom de fichier sans son chemin (équivalent de basename)
+Que donne ${f%/*} ?	Le répertoire du chemin (équivalent de dirname)
+Que fait ${VAR:?message} ?	Affiche le message sur stderr et fait sortir le script si VAR est vide ou non définie
+Pourquoi utiliser [[ ]] plutôt que [ ] en bash ?	[[ ]] est un mot-clé : pas de découpage ni de globbing sur les variables, plus ==, =~, && et ||
+Que vaut [[ 9 > 10 ]] ?	Vrai : c'est une comparaison de CHAÎNES. Pour des nombres il faut (( 9 > 10 ))
+Quel test vérifie qu'un fichier existe ET n'est pas vide ?	[[ -s "$f" ]]
+Pourquoi 'cat f | while read l; do n=$((n+1)); done' laisse-t-il n à 0 ?	Chaque maillon d'un pipe tourne dans un sous-shell ; la variable meurt avec lui
+Comment lire une commande dans un while sans perdre les variables ?	Substitution de processus : while read …; done < <(commande)
+Que signifie un code de sortie de 127 ?	Commande introuvable (typiquement un PATH incomplet sous cron)
+Que signifie un code de sortie de 137 ?	128 + 9 = tué par SIGKILL, en pratique l'OOM killer
+Que signifie un code de sortie de 143 ?	128 + 15 = SIGTERM, un arrêt propre demandé
+Que signifie un code de sortie de 124 ?	La commande timeout a expiré et a tué le processus
+Quel code retourne grep quand il ne trouve aucune correspondance ?	1 (et 2 en cas d'erreur réelle) — d'où les scripts tués sous set -e
+Quels signaux ne peuvent jamais être rattrapés par trap ?	SIGKILL (9) et SIGSTOP (19)
+Pourquoi flock est-il supérieur à un fichier PID pour un verrou ?	Le verrou est porté par le descripteur : le noyau le libère à la mort du process, même sur kill -9
+Quelle est la première ligne à écrire dans un handler de trap ?	local rc=$? — capturer le code avant que toute autre commande ne l'écrase
+Différence entre <<EOF et <<'EOF' ?	Sans quotes le corps est interprété (variables, $( )) ; avec le délimiteur quoté il est littéral
+Que retire <<-EOF en début de ligne ?	Les tabulations uniquement, pas les espaces
+En quoi <(cmd) est-il remplacé après expansion ?	Par un chemin de descripteur, du type /dev/fd/63
+Pourquoi '2>&1 > f' ne met-il pas les erreurs dans f ?	2>&1 copie la destination actuelle de 1 (le terminal) ; le déplacement de 1 vient après. Forme correcte : > f 2>&1
+Que fait NR==FNR dans un awk à deux fichiers ?	C'est vrai uniquement pendant la lecture du premier fichier : l'idiome pour charger un référentiel en mémoire
+Quelle est la différence entre NR et NF en awk ?	NR = numéro de la ligne courante ; NF = nombre de champs de cette ligne
+Pourquoi 'sort -k3' ne trie-t-il pas sur le champ 3 ?	Il trie du champ 3 jusqu'à la fin de la ligne ; il faut écrire -k3,3
+Quelle condition uniq exige-t-il sur son entrée ?	Elle doit être triée : uniq ne compare que les lignes adjacentes
+À quoi sert jq -r ?	Sortie brute : les chaînes sortent sans guillemets JSON, exploitables dans un pipe
+Que signale l'erreur 'Argument list too long' et comment la corriger ?	Le dépassement d'ARG_MAX (environ 2 Mio) ; corriger avec find -print0 | xargs -0 ou find -exec … +
+Pourquoi faut-il find -print0 avec xargs -0 ?	Le NUL est le seul octet impossible dans un nom de fichier : les espaces et apostrophes ne cassent plus le découpage
+Pourquoi 'wait' sans argument ne détecte-t-il pas un job en échec ?	Il attend tous les jobs et retourne 0 ; il faut faire wait "$pid" job par job
+Pourquoi publier un fichier par écriture dans un temporaire puis mv ?	rename() est atomique sur un même système de fichiers : aucun consommateur ne voit de fichier partiel
+Quelle condition rend le mv de publication atomique ?	Le fichier temporaire doit être sur le MÊME système de fichiers que la cible
+Que signale l'avertissement shellcheck SC2086 ?	Une expansion non quotée, exposée au découpage en mots et au globbing
+Quand faut-il quitter bash pour Python ?	CSV quoté ou JSON profond, flottants, dates et fuseaux, API paginée, plus de 150 lignes, besoin de tests
+Pourquoi le -r de read est-il obligatoire ?	Sans lui, read interprète les antislashs au lieu de les conserver
