@@ -125,6 +125,9 @@ Les cartes sont en TSV (`question<TAB>réponse`, sans en-tête).
 
 Sans Anki, le TSV se lit très bien dans un tableur en masquant la colonne B.
 
+**Outil fourni** : `./outils/anki.sh valider` contrôle le format de toutes les cartes,
+`./outils/anki.sh build` assemble un deck par famille dans `outils/decks/`.
+
 ---
 
 ## L'objectif réel du 30 septembre
