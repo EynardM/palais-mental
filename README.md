@@ -130,6 +130,23 @@ Sans Anki, le TSV se lit très bien dans un tableur en masquant la colonne B.
 
 ---
 
+## Tenir le tableau de bord à jour
+
+Quand tu termines la **Plongée** d'un module, renseigne sa colonne « Vu le » dans
+`PROGRESSION.md`, puis :
+
+```
+./outils/rappels.py
+```
+
+Le calendrier de rappel espacé est recalculé sur tes **dates réelles**. Un décalage d'une
+journée ne désynchronise donc rien.
+
+Un **Survol** seul (fiche lue sans le cours) ne compte pas comme `N1` : il se note dans la
+colonne « Notes ».
+
+---
+
 ## L'objectif réel du 30 septembre
 
 Pas d'être expert. D'être :

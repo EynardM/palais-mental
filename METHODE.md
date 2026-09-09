@@ -86,8 +86,13 @@ Un rappel n'est pas une relecture. C'est **2 à 5 minutes** :
 
 Un ⚠️ remet le compteur à zéro : le module repasse en J+1.
 
-`PROGRESSION.md` contient la table de rappel : chaque jour tu regardes la colonne du jour,
+`PROGRESSION.md` contient la table de rappel : chaque jour tu regardes la ligne du jour,
 elle te dit exactement quoi rappeler. Tu n'as jamais à réfléchir à ce qu'il faut réviser.
+
+Cette table est **calculée sur tes dates réelles**, pas sur les dates prévues. Quand tu termines
+la Plongée d'un module, tu renseignes sa colonne « Vu le » puis tu lances `./outils/rappels.py` :
+le calendrier se réaligne. Un jour de décalage ne désynchronise donc jamais tes rappels — ce qui
+compte, puisque tu vas décaler.
 
 **Ordre de la séance, toujours :** rappels d'abord (à froid, c'est le but), nouveau module ensuite.
 
@@ -142,6 +147,10 @@ Pour chaque module, tu notes ton niveau dans `PROGRESSION.md` :
 | **N2** | Restitué | J'ai réécrit la fiche de mémoire sans trou majeur |
 | **N3** | Expliqué | Feynman 3 min sans notes, à voix haute, sans bafouiller |
 | **N4** | Appliqué | J'ai fait l'atelier / répondu à la question d'entretien type |
+
+Un **Survol seul** — la fiche lue sans le cours — ne fait pas passer à `N1`. Il se note dans
+la colonne « Notes ». C'est une distinction qui a l'air tatillonne et qui ne l'est pas : un
+tracker qui compte les survols comme des lectures te dira que tu es prêt alors que tu ne l'es pas.
 
 **🎯 Objectif au 29/09 : tous les modules 🔴 en N3 minimum, les 🟠 en N2 minimum.**
 
