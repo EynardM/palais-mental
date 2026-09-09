@@ -147,9 +147,9 @@ Anciennes commandes (`net-tools`) qu'on croise encore : `ifconfig`, `route -n`, 
 ## 7. Commandes — calcul de subnet
 
 ```bash
-ipcalc 192.168.37.201/26          # réseau, broadcast, plage, binaire
-ipcalc -b 10.20.4.0/22            # sans le binaire
+ipcalc 192.168.37.201/26          # réseau, broadcast, plage, écriture binaire
 sipcalc 10.10.0.0/22 -s 24        # découpe le /22 en /24
+sipcalc -a 2001:db8::1            # toutes les formes d'une adresse IPv6
 netmask -c 192.168.8.0:192.168.11.255   # plage → préfixes CIDR
 whois -h whois.cymru.com " -v 8.8.8.8"  # à quel AS / préfixe appartient une IP
 ```
@@ -214,7 +214,7 @@ ip route flush cache
 | `net.ipv4.ip_default_ttl` | 64 | TTL initial |
 | `net.ipv4.ip_local_port_range` | 32768 60999 | ports éphémères |
 | `net.ipv4.icmp_echo_ignore_all` | 0 | 1 = ne plus répondre au ping |
-| `net.ipv4.conf.all.rp_filter` | 1/2 | anti-spoofing par route inverse |
+| `net.ipv4.conf.all.rp_filter` | selon distro | anti-spoofing par route inverse (0 off, 1 strict, 2 lâche) |
 | `net.ipv6.conf.eth0.accept_ra` | 1 | accepter les RA (0 si l'interface route) |
 | `net.ipv6.conf.all.use_tempaddr` | 0/2 | adresses temporaires RFC 4941 |
 | `net.ipv4.tcp_mtu_probing` | 0 | 1 = contourne les trous noirs de PMTU |
