@@ -1,0 +1,45 @@
+Taille minimale de l'en-tête IPv4 ?	20 octets
+En quelle unité s'exprime le champ IHL ?	En mots de 32 bits (4 octets) : IHL = 5 → 20 octets
+Numéro de protocole IP de TCP ?	6
+Numéro de protocole IP d'UDP ?	17
+Numéro de protocole IP d'ICMP ?	1
+Valeur DSCP de la classe EF (voix) ?	46
+En quelle unité s'exprime le Fragment Offset d'IPv4 ?	En unités de 8 octets
+Que signifie le flag DF de l'en-tête IPv4 ?	Don't Fragment : interdiction de découper le paquet
+Sur quels fragments le flag MF vaut-il 1 ?	Sur tous sauf le dernier
+TTL initial par défaut sous Linux ?	64
+Que couvre le checksum de l'en-tête IPv4 ?	L'en-tête uniquement, jamais les données
+Pourquoi chaque routeur recalcule-t-il le checksum IPv4 ?	Parce qu'il décrémente le TTL, qui fait partie de l'en-tête
+Formule du nombre total d'adresses d'un préfixe /n ?	2^(32 − n)
+Nombre d'hôtes utilisables dans un /26 ?	62
+Masque décimal d'un /27 ?	255.255.255.224
+Quel préfixe correspond au masque 255.255.255.240 ?	/28
+Formule de la taille de bloc en subnetting ?	256 − valeur du masque dans l'octet intéressant
+Adresse réseau de 192.168.37.201/26 ?	192.168.37.192
+Adresse de broadcast de 172.22.145.77/19 ?	172.22.159.255
+Dernière adresse de la plage privée 172.16.0.0/12 ?	172.31.255.255
+Quelle route gagne quand plusieurs correspondent à une destination ?	Celle au préfixe le plus long (longest prefix match)
+Dans quel ordre alloue-t-on les blocs en VLSM ?	Du plus gros au plus petit
+Que conclure d'une interface configurée en 169.254.x.x ?	APIPA : le DHCP a échoué, adresse auto-attribuée
+À quoi sert l'adresse 169.254.169.254 en cloud ?	Service de métadonnées de l'instance (user-data, credentials IAM)
+Que signifie 0.0.0.0/0 dans une table de routage ?	La route par défaut
+Taille de l'en-tête IPv6 ?	40 octets, fixe
+Pourquoi IPv6 n'a-t-il pas de checksum d'en-tête ?	Ethernet et TCP/UDP en ont déjà un ; le recalcul à chaque saut coûtait du CPU
+Qui peut fragmenter un paquet IPv6 ?	La source uniquement, jamais les routeurs
+MTU minimum garanti en IPv6 ?	1280 octets
+Combien de fois « :: » peut-il apparaître dans une adresse IPv6 ?	Une seule fois
+Forme abrégée de 2001:0db8:0000:0000:0000:ff00:0042:8329 ?	2001:db8::ff00:42:8329
+Préfixe des adresses IPv6 link-local ?	fe80::/10 (fe80::/64 en pratique)
+Taille standard d'un subnet IPv6 sur un LAN ?	/64
+Pourquoi un subnet IPv6 fait-il toujours /64 ?	SLAAC exige un Interface ID de 64 bits
+Type ICMPv6 d'un Router Advertisement ?	134
+Type et code ICMP exploités par traceroute ?	Type 11 code 0 (TTL exceeded in transit)
+Type et code ICMP qui annoncent le PMTU en IPv4 ?	Type 3 code 4 (fragmentation needed, DF set)
+Quel message ICMPv6 annonce le PMTU ?	Type 2, Packet Too Big
+Signature typique d'un trou noir de PMTU ?	Handshake et petites requêtes passent, les gros transferts gèlent
+Commande pour tester un PMTU de 1500 octets ?	ping -M do -s 1472 <cible>
+MSS TCP correspondant à un MTU de 1500 en IPv4 ?	1460 (MTU − 40)
+Combien d'adresses AWS réserve-t-il dans chaque subnet ?	5
+Pourquoi deux VPC en 10.0.0.0/16 ne peuvent-ils pas être appairés ?	CIDR chevauchants : le routage serait ambigu
+Valeur par défaut de maxPods sur un kubelet ?	110
+Cluster CIDR /16 et podCIDR /24 par nœud : combien de nœuds au maximum ?	256
