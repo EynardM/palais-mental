@@ -1,87 +1,45 @@
 Quels sont les 3 criteres de selection d'une route, dans l'ordre ?	1) Longest prefix match  2) Distance administrative  3) Metrique
 Lequel des 3 criteres de routage ecrase les deux autres ?	Le longest prefix match : il tranche avant l'AD et la metrique
 Une statique /16 et une route OSPF /24 couvrent la destination. Laquelle gagne ?	La route OSPF /24 : le prefixe le plus long gagne, le protocole n'entre pas en jeu
-Sur quoi la distance administrative departage-t-elle ?	Uniquement des prefixes strictement identiques, appris par des sources differentes
 Distance administrative d'une route connectee ?	0
 Distance administrative d'une route statique ?	1
 Distance administrative d'OSPF ?	110
 Distance administrative de RIP ?	120
 Distance administrative d'eBGP et d'iBGP ?	eBGP 20, iBGP 200
-Distance administrative d'EIGRP interne et externe ?	90 interne, 170 externe
-Que fait une route de distance administrative 255 ?	Elle n'est jamais installee dans la table : sert a neutraliser une route sans l'effacer
-Quelle est la longueur de prefixe de la route par defaut, et pourquoi perd-elle toujours ?	0 bit : elle correspond a tout, donc tout prefixe plus long la bat
-Linux a-t-il une distance administrative ?	Non : le noyau ne connait qu'une metrique, la plus basse gagne a prefixe egal
+Que fait une route de distance administrative 255 ?	Elle n'est jamais installee : sert a neutraliser une route sans effacer sa configuration
 Difference entre RIB et FIB ?	RIB = ce que le routeur sait (plan de controle). FIB/CEF = ce qu'il fait (plan de donnees)
 Dans la sortie Cisco [110/138], que valent les deux nombres ?	110 = distance administrative, 138 = metrique. Toujours [AD/metrique]
 Que signifie le code O IA dans show ip route ?	Route OSPF inter-area, annoncee par un ABR via une LSA de type 3
-Dans ip route, que signifie l'absence du mot-cle via ?	La destination est directement connectee : resolution ARP puis emission, sans routeur intermediaire
-Que signifie proto kernel dans une sortie ip route ?	Route creee automatiquement par le noyau quand on a pose une adresse sur l'interface
 Numeros des tables de routage Linux local, main et default ?	local 255, main 254, default 253
 Quelle commande donne la decision de routage reelle sous Linux ?	ip route get <IP> : elle applique le LPM et montre next-hop, dev et src
 Quel sysctl active le routage IPv4 sous Linux ?	net.ipv4.ip_forward = 1
 A quoi sert une route flottante ?	Statique a AD elevee (ex 130) : secours qui ne s'installe que si le protocole dynamique perd le prefixe
-Que fait une route blackhole sous Linux ?	Elle jette le paquet en silence, sans emettre d'ICMP. Equivalent Cisco : Null0
-Pourquoi ne jamais ecrire une statique par interface sur un lien Ethernet ?	Le routeur croit toute la destination directement connectee et envoie un ARP par destination distante
 Comment la repartition ECMP se fait-elle ?	Par flux, via un hachage (IP src/dst, parfois ports) : jamais paquet par paquet
-Combien de chemins ECMP Cisco IOS installe-t-il par defaut ?	4 (maximum-paths)
-Qu'echange un protocole a vecteur de distance ?	Ses routes et leur distance, a ses voisins directs seulement
-Qu'echange un protocole a etat de liens ?	L'etat de ses propres liens (LSA), inonde a toute l'aire
+Quelle difference entre ce qu'echange un vecteur de distance et un etat de liens ?	Le vecteur annonce ses routes a ses voisins, l'etat de liens inonde l'etat de ses liens a toute l'aire
 Metrique maximale de RIP, et valeur signifiant inatteignable ?	15 sauts maximum, 16 = infini
-Port et multicast de RIPv2 ?	UDP 520, multicast 224.0.0.9
-Que fait le split horizon ?	Il interdit de reannoncer une route sur l'interface par laquelle on l'a apprise
-Condition de faisabilite EIGRP ?	RD du voisin < FD actuelle : le voisin est alors un feasible successor, secours garanti sans boucle
 Numero de protocole IP d'OSPF ?	89 : OSPF s'appuie directement sur IP, ni TCP ni UDP
 Adresses multicast d'OSPF ?	224.0.0.5 AllSPFRouters, 224.0.0.6 AllDRouters
-Taille de l'en-tete OSPFv2 ?	24 octets (16 en OSPFv3)
 Timers Hello et Dead par defaut sur un lien OSPF broadcast ?	Hello 10 s, Dead 40 s (Dead = 4 x Hello)
-Timers Hello et Dead OSPF sur NBMA et point-to-multipoint ?	Hello 30 s, Dead 120 s
 Cite les 5 types de paquets OSPF dans l'ordre.	1 Hello, 2 DBD, 3 LSR, 4 LSU, 5 LSAck
 Cite les 8 etats d'adjacence OSPF dans l'ordre.	Down, Attempt, Init, 2-Way, ExStart, Exchange, Loading, Full
 A quel etat OSPF l'election DR/BDR a-t-elle lieu ?	En 2-Way
 Deux routeurs OSPF restent bloques en ExStart : cause la plus probable ?	Un MTU different des deux cotes : OSPF le compare dans les DBD et refuse de continuer
-Deux routeurs OSPF restent en Init : que se passe-t-il ?	Le trafic est unidirectionnel : ACL, mauvais VLAN ou authentification asymetrique
-Deux DROTHER restent en 2-Way sur un segment broadcast : est-ce un probleme ?	Non, c'est le comportement normal : ils ne s'appairent qu'avec le DR et le BDR
+Deux DROTHER restent en 2-Way sur un segment broadcast : est-ce un probleme ?	Non, c'est normal : ils ne s'appairent qu'avec le DR et le BDR
 Comment le DR est-il elu ?	Priorite la plus haute (defaut 1, 0 = jamais DR), puis Router ID le plus haut. Election non preemptive
-Combien d'adjacences avec et sans DR sur un segment de n routeurs ?	Sans DR n(n-1)/2, avec DR/BDR 2n-3
-Le DR route-t-il le trafic de donnees du segment ?	Non : il ne centralise que la synchronisation des LSA. Les paquets vont en direct
-Qui genere une LSA de type 1 ?	Tous les routeurs : elle decrit leurs propres liens et ne sort jamais de l'aire
 Qui genere une LSA de type 2, et pourquoi ?	Le DR : elle liste les routeurs du segment multi-acces, represente comme un pseudo-noeud
-Qui genere une LSA de type 3 et que contient-elle ?	L'ABR : un prefixe d'une autre aire avec son cout
-Qui genere une LSA de type 5 ?	L'ASBR : une route externe, inondee dans tout l'AS sauf les aires stub
 A quoi sert une LSA de type 7 ?	A porter une route externe dans une NSSA ou le type 5 est interdit. L'ABR la convertit en type 5
 MaxAge et intervalle de rafraichissement d'une LSA OSPF ?	MaxAge 3600 s (1 h), rafraichissement 1800 s (30 min)
 Que peut-on dire des LSDB de deux routeurs d'une meme aire OSPF ?	Elles sont rigoureusement identiques : c'est l'invariant fondamental d'OSPF
 Formule du cout OSPF ?	Cout = bande passante de reference / bande passante de l'interface, division entiere, minimum 1
 Bande passante de reference OSPF par defaut ?	10 puissance 8 bit/s, soit 100 Mbit/s
 Cout OSPF par defaut d'un lien a 10 Gbit/s ? Quel est le probleme ?	1, comme un lien a 100 Mbit/s : OSPF ne peut plus les departager
-Cout OSPF par defaut d'une liaison T1 a 1,544 Mbit/s ?	64
-Comment corriger la bande passante de reference OSPF ?	auto-cost reference-bandwidth 100000 (en Mbit/s), sur tous les routeurs de l'AS
-Ordre de preference des routes a l'interieur d'OSPF ?	O intra-aire > O IA inter-aire > E1/N1 > E2/N2, avant toute comparaison de cout
 Difference entre une route externe OSPF E1 et E2 ?	E2 (defaut) = cout externe seul. E1 = cout externe + cout interne jusqu'a l'ASBR
-Metrique de depart par defaut d'une route redistribuee dans OSPF ?	20, en type E2 (mais 1 quand la source est BGP)
-Pourquoi toute aire OSPF doit-elle toucher l'aire 0 ?	Entre aires OSPF raisonne en vecteur de distance sur les type 3 : la hierarchie en etoile evite les boucles
-Qu'est-ce qu'un ABR ?	Un routeur avec au moins une interface dans l'aire 0 et une dans une autre aire. Il genere les type 3 et 4
-Qu'est-ce qu'un ASBR ?	Un routeur qui redistribue dans OSPF des routes venues d'ailleurs. Il genere les type 5 (ou 7 en NSSA)
-Qu'interdit une aire stub ?	Les LSA de type 4 et 5 : l'ABR y injecte une route par defaut a la place
-Qu'ajoute une aire totally stubby par rapport a une stub ?	Elle bloque aussi les type 3 : il ne reste que la route par defaut
 Pourquoi perd-on ses voisins apres avoir configure area 10 stub sur un seul routeur ?	Le flag stub est dans le Hello : tous les routeurs de l'aire doivent l'avoir, sinon pas d'adjacence
 Que fait passive-interface en OSPF ?	Elle arrete l'emission des Hello sur l'interface, mais le reseau de cette interface reste annonce
-Le process-id OSPF doit-il correspondre entre deux voisins ?	Non, il est purement local. C'est l'Area ID qui doit correspondre
-Comment le Router ID OSPF est-il choisi ?	1) router-id configure  2) plus haute IP de loopback active  3) plus haute IP physique active
-Pourquoi forcer ip ospf network point-to-point entre deux routeurs ?	Pour supprimer l'election DR/BDR : on evite 40 s d'attente et une LSA de type 2 inutile
-Que risque-t-on en annoncant un resume dont un sous-reseau n'existe plus ?	Une boucle : le trafic revient et repart par la route par defaut. Parade : une route Null0 ou blackhole
-Combien de temps OSPF met-il a detecter un voisin mort dont le lien reste up ?	40 s, le dead interval par defaut
-Quel delai de detection permet BFD ?	150 a 900 ms : intervalle de 50 a 300 ms multiplie par 3
-Delai SPF par defaut avant le premier calcul sur IOS ?	5 s (timers throttle spf 5000 10000 10000)
+Combien de temps OSPF met-il a detecter un voisin mort dont le lien reste up, et comment fait-on mieux ?	40 s (dead interval). Avec BFD : 150 a 900 ms
 Qu'est-ce qu'une VRF ?	Plusieurs tables de routage etanches dans un meme routeur : l'equivalent du VLAN en couche 3
-Difference entre Route Distinguisher et Route Target ?	Le RD rend le prefixe unique dans MP-BGP. Le RT decide quelle VRF importe quelle route
 Le peering entre VPC est-il transitif ?	Non : A-B et B-C ne donnent jamais A-C. Il faut un Transit Gateway
 Le ping passe mais TCP reste en SYN_SENT : diagnostic le plus probable ?	Routage asymetrique : un pare-feu a etats sur le retour voit un SYN-ACK sans SYN et le jette
 Que fait rp_filter en mode strict sous Linux ?	Il jette un paquet entrant si la route de retour vers sa source ne sort pas par la meme interface
-Comment se calcule la valeur effective de rp_filter ?	C'est le maximum entre net.ipv4.conf.all.rp_filter et celui de l'interface
-Que signifient trois etoiles sur une ligne de traceroute ?	Que ce routeur ne genere pas d'ICMP Time Exceeded (filtrage ou rate-limiting), pas que le paquet est perdu
-Le traceroute montre-t-il le chemin de retour ?	Non, uniquement l'aller. Le retour peut emprunter un autre chemin
+Que signifient trois etoiles sur une ligne de traceroute ?	Que ce routeur ne genere pas d'ICMP Time Exceeded, pas que le paquet est perdu
 Combien de RTT compte-t-on par 100 km de fibre ?	Environ 1 ms : la lumiere va a 200 000 km/s dans le verre
-RTT typique entre l'Europe et la cote est des Etats-Unis ?	75 a 90 ms
-Les ClusterIP Kubernetes sont-elles routees ?	Non : aucune machine ne les possede, kube-proxy fait de la DNAT vers une IP de pod
-Quelle taille de prefixe recoit un noeud Kubernetes par defaut dans le pod CIDR ?	Un /24 (node-cidr-mask-size 24), alors que kubelet plafonne a 110 pods par noeud
