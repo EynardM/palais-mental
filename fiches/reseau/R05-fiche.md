@@ -14,7 +14,7 @@
 | 4 200 000 000 – 4 294 967 294 | privés 32 bits |
 
 **Chaîne** : IANA → 5 RIR (RIPE NCC · ARIN · APNIC · LACNIC · AFRINIC) → LIR → toi.
-**Ordres de grandeur** : ~75 000 AS visibles · ~1 M routes IPv4 · ~200 k IPv6 · Tier 1 ≈ 10 acteurs.
+**Ordres** : ~75 000 AS visibles · ~1 M routes IPv4 · ~200 k IPv6 · Tier 1 ≈ 10 acteurs (n'achètent aucun transit).
 
 ## BGP — le protocole
 
@@ -59,8 +59,8 @@ En-tête **19 o** = Marker 16 (tout à 1) + Length 2 + Type 1. Message max **409
 | 8 / 16 / 32 | COMMUNITY / Extended / Large | opt. trans. | globale | 4 / **8** / 12 octets |
 | 9 / 10 | ORIGINATOR_ID / CLUSTER_LIST | opt. non-trans. | AS local | anti-boucle **RR** |
 
-**WEIGHT** = pas un attribut, Cisco, **local au routeur**, défaut **0** (appris) / **32768** (local), max 65535.
-**Flags** : 0x80 Optional · 0x40 Transitive · 0x20 Partial · 0x10 Extended Length.
+**WEIGHT** : pas un attribut, Cisco, **local au routeur**, défaut **0** (appris) / **32768** (local), max 65535.
+**Flags** 0x80 Optional · 0x40 Transitive · 0x20 Partial · 0x10 Extended Length.
 
 ## Sélection du meilleur chemin — `N W L O A O M E I R`
 
@@ -69,8 +69,8 @@ En-tête **19 o** = Marker 16 (tout à 1) + Length 2 + Type 1. Message max **409
 4 AS_PATH ↓            5 ORIGIN ↓   6 MED ↓ (même AS voisin !)
 7 eBGP > iBGP          8 métrique IGP ↓   9 + ancien, router-ID ↓, cluster-list ↓, IP ↓
 ```
-« **N**os **W**agons **L**ivrent **O**nze **A**nanas **O**range, **M**ais **E**lle **I**gnore **R**obert. »
-**Les 2 premières préférences MONTENT, tout le reste DESCEND.**
+« **N**os **W**agons **L**ivrent **O**nze **A**nanas **O**range, **M**ais **E**lle **I**gnore **R**obert. » —
+**les 2 premières préférences MONTENT, tout le reste DESCEND.**
 
 ## Communities
 
@@ -98,7 +98,7 @@ Anti-boucle : **ORIGINATOR_ID** (9) + **CLUSTER_LIST** (10). Le RR ne modifie au
 **Transit = accès à tout Internet, payant. Peering = pair + ses clients, gratuit, NON TRANSITIF.**
 Local pref type : **client 200 > peer 100 > transit 50**.
 **Valley-free** : route de client → à tous · route de peer/transit → **aux clients seulement**.
-IXP : L2 partagé, peering bilatéral ou via **route server** (transparent, pas dans l'AS_PATH).
+IXP : L2 partagé, peering bilatéral ou via **route server** (transparent, absent de l'AS_PATH, ne route rien).
 
 ## Incidents & sécurité
 
@@ -115,8 +115,7 @@ MyEtherWallet 2018 (DNS AWS, ~150 k$) · Facebook 2021 (retrait BGP, ~6 h) · 51
 | LABEL 20 b | TC 3 b | S 1 b | TTL 8 b |   = 32 bits = 4 octets   → « 20 h 31, 8 s »
 ```
 EtherType **0x8847** · labels 0-15 réservés : **0** IPv4 null · **2** IPv6 null · **3 Implicit NULL → PHP**.
-**PUSH** (ingress PE) → **SWAP** (P) → **POP** (egress). LDP : **UDP 646** hello, **TCP 646** session.
-RSVP-TE : IP proto 46. SR : pas de protocole, SRGB Cisco 16000-23999.
+**PUSH** (ingress PE) → **SWAP** (P) → **POP** (egress). LDP **UDP 646** hello / **TCP 646** session · RSVP-TE IP proto 46 · SR : pas de protocole de labels, SRGB Cisco 16000-23999.
 
 **VPN L3 (RFC 4364)** : VRF + **RD 8 o** (unicité seule) + **RT** extended community (import/export).
 VPNv4 = RD 8 o + IPv4 4 o = **12 o**. MP-BGP **AFI 1 / SAFI 128**. EVPN = AFI 25 / SAFI 70.
@@ -125,10 +124,8 @@ VPNv4 = RD 8 o + IPv4 4 o = **12 o**. MP-BGP **AFI 1 / SAFI 128**. EVPN = AFI 25
 
 ## Cloud
 
-DX/ExpressRoute/Interconnect = **BGP sur VLAN 802.1Q** · AWS public AS **16509** · Azure **12076** ·
-DX communities `7224:7100/7200/7300` (local pref) et `7224:8100/8200` (portée).
-Calico : node-to-node mesh (= full mesh iBGP, AS 64512) → **RR au-delà de ~100 nœuds**.
-MetalLB BGP : annonce le VIP depuis n nœuds → **ECMP** ; ⚠ rehash à la panne casse les sessions.
+DX/ExpressRoute/Interconnect = **BGP sur VLAN 802.1Q** · AWS public AS **16509** · Azure **12076** · DX communities `7224:7100/7200/7300` (local pref), `7224:8100/8200` (portée).
+Calico : node-to-node mesh (= full mesh iBGP, AS 64512) → **RR au-delà de ~100 nœuds**. MetalLB BGP : annonce le VIP depuis n nœuds → **ECMP** ; ⚠ rehash à la panne casse les sessions.
 Données : **MRT** (fichiers RouteViews/RIS, différé) vs **BMP** (streaming routeur, pré-policy).
 
 ## Test express
