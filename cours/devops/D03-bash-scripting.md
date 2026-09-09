@@ -167,7 +167,7 @@ boucle (comptable : ~1 ms par fork, ×100 000 fichiers = 100 s de perdues).
 
 | Écriture | Effet | Exemple `f=/data/raw/ventes.csv.gz` |
 |---|---|---|
-| `${#v}` | longueur | `${#f}` → `24` |
+| `${#v}` | longueur | `${#f}` → `23` |
 | `${v:-def}` | valeur si vide/non défini (**ne modifie pas** `v`) | garde-fou de lecture |
 | `${v:=def}` | idem **et affecte** `v` | valeur par défaut durable |
 | `${v:?msg}` | **erreur et sortie** si vide/non défini | validation d'entrée |
@@ -259,7 +259,7 @@ connaître, parce que ce sont exactement celles où on croit être protégé :
    set -e NE DÉCLENCHE PAS quand la commande est :
 
    1. la condition d'un if / while / until      if grep -q x f; then       <- normal
-   2. à gauche/droite d'un && ou ||             cmd_qui_echoue || true
+   2. un maillon NON FINAL d'un && ou ||        cmd_qui_echoue || true   <- le DERNIER, lui, déclenche
    3. précédée d'un !                           ! grep -q x f
    4. ailleurs que la dernière d'un pipeline    faux | vrai   -> code 0    <- d'où pipefail
    5. dans une substitution de commande         x=$(faux); echo "continue" <- (sans inherit_errexit)
@@ -1029,17 +1029,18 @@ mkdir -p "$DST_DIR"                          # idempotent : pas d'erreur si déj
 exec 9>"$LOCK_FILE"
 flock -n 9 || die 75 "une autre instance tourne (verrou $LOCK_FILE)"
 
-# --- travail ---
-TMPDIR_RUN="$(mktemp -d -p "$DST_DIR" .staging-XXXXXX)"   # MÊME FS que la cible -> mv atomique
-fichiers=( "$SRC_DIR/$jour"/*.csv )
-(( ${#fichiers[@]} > 0 )) || die 3 "aucun fichier pour $jour"
-log INFO "${#fichiers[@]} fichier(s) à traiter"
-
+# --- idempotence : le marqueur se teste EN TÊTE, avant tout travail ---
 marqueur="$DST_DIR/$jour/_SUCCESS"
 if [[ -f "$marqueur" ]]; then
     log INFO "$jour déjà ingéré, rien à faire"      # <- L'IDEMPOTENCE EST ICI
     exit 0
 fi
+
+# --- travail ---
+fichiers=( "$SRC_DIR/$jour"/*.csv )
+(( ${#fichiers[@]} > 0 )) || die 3 "aucun fichier pour $jour"
+log INFO "${#fichiers[@]} fichier(s) à traiter"
+TMPDIR_RUN="$(mktemp -d -p "$DST_DIR" .staging-XXXXXX)"   # MÊME FS que la cible -> mv atomique
 
 for f in "${fichiers[@]}"; do
     [[ -s "$f" ]] || { log WARN "fichier vide ignoré : ${f##*/}"; continue; }
@@ -1372,8 +1373,8 @@ opérationnelle : tout ce qui sort d'un `$` va entre guillemets, sauf découpage
 **2. Que fait `set -euo pipefail`, et pourquoi n'est-ce pas suffisant ?**
 `-e` quitte à la première commande en échec, `-u` transforme une variable non définie en erreur,
 `-o pipefail` fait qu'un pipeline échoue si **n'importe quel** maillon échoue. Ce n'est pas suffisant
-parce que `-e` a des angles morts documentés : conditions de `if`/`while`, opérandes de `&&`/`||`,
-commandes précédées de `!`, substitutions de commande (sans `inherit_errexit`), et affectations avec
+parce que `-e` a des angles morts documentés : conditions de `if`/`while`, tout maillon d'une liste
+`&&`/`||` **sauf le dernier**, commandes précédées de `!`, substitutions de commande (sans `inherit_errexit`), et affectations avec
 `local`/`export` qui masquent le code de retour. On complète avec `set -E` + `trap … ERR` pour tracer,
 `shopt -s inherit_errexit`, et surtout des tests explicites sur les points critiques.
 

@@ -73,7 +73,7 @@ ip link del br0
 | 1500 | Ethernet standard |
 | 1450 | derrière VXLAN (−50) |
 | 1476 | GRE (−24) |
-| 1420 / 1412 | WireGuard (−80 / −88 selon v4/v6) |
+| 1440 / 1420 | WireGuard (−60 en IPv4, −80 en IPv6 ; `wg-quick` met **1420** par défaut) |
 
 ## 4. `ip addr`
 
@@ -255,7 +255,7 @@ nsenter -t $(docker inspect -f '{{.State.Pid}}' C) -n tcpdump -i eth0 -nn
 | `ip[8] < 5` | TTL faible |
 | `ip[6] & 0x20 != 0` | flag *More Fragments* |
 | `ip[6:2] & 0x1fff != 0` | fragments non initiaux |
-| `udp[8:2] = 0x0100` | requêtes DNS |
+| `udp[10:2] = 0x0100` | requêtes DNS (flags DNS = udp[10:2], l'ID est en udp[8:2]) |
 | `greater 1400` / `less 100` | taille |
 | `vlan 42` | ⚠ décale tous les offsets suivants de 4 o |
 

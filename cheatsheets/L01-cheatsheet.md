@@ -24,7 +24,7 @@ Référence opérationnelle. À garder ouverte pendant qu'on code.
 | `csv.field_size_limit()` | **131072** octets |
 | Longueur de ligne `black` / `ruff format` | **88** colonnes (PEP 8 : 79) |
 | Indentation PEP 8 | **4 espaces** |
-| Row group Parquet visé | **128 Mo – 1 Go** (~1 M lignes par défaut avec pyarrow) |
+| Row group Parquet | **~128 Mo** (~1 M lignes, défaut pyarrow) — fichier visé **128 Mo – 1 Go** |
 | Ratio de taille Parquet vs CSV | **5 à 10× plus petit** |
 | Coût mémoire d'un CSV chargé en objets Python | **×5 à ×10** |
 

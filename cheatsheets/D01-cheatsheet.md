@@ -87,7 +87,7 @@ trap 'echo cleanup; exit 0' TERM INT   # handler en bash
 **Calcul** : fichier = `666 & ~umask` · répertoire = `777 & ~umask`.
 
 ```bash
-chmod 640 f            chmod u+x,g-w f       chmod -R g+rX dir/   # X = x seulement sur les répertoires
+chmod 640 f            chmod u+x,g-w f       chmod -R g+rX dir/   # X = x sur les répertoires ET sur les fichiers déjà exécutables
 chmod 2775 /data/proj  chmod +t /shared      chown user:group f   chgrp -R data dir/
 find / -perm -4000 -type f 2>/dev/null       # audit setuid
 find /data ! -user spark -ls                 # fichiers d'un autre propriétaire

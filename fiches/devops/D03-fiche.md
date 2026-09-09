@@ -26,10 +26,10 @@
 set -Eeuo pipefail
 IFS=$'\n\t'
 ```
-`-e` sortie à la 1re erreur · `-u` variable non définie = erreur · `-o pipefail` pipeline = 1er échec ·
+`-e` sortie à la 1re erreur · `-u` variable non définie = erreur · `-o pipefail` code du pipeline = **dernier maillon en échec** ·
 `-E` trap ERR hérité par les fonctions. **IFS défaut = espace, tabulation, saut de ligne.**
 
-**Les 6 angles morts de `set -e`** : condition de `if`/`while` · opérande de `&&`/`||` · après `!` ·
+**Les 6 angles morts de `set -e`** : condition de `if`/`while` · maillon **non final** d'un `&&`/`||` · après `!` ·
 maillon non final d'un pipe · dans `$( )` (sauf `inherit_errexit`) · `local x=$(cmd)` (code de `local` = 0).
 Bonus mortel : **`((i++))` rend 1 quand `i` vaut 0** → utiliser `i=$((i+1))`.
 

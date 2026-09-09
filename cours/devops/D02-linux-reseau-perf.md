@@ -34,14 +34,15 @@ bas rend tous les tests du haut ininterprétables.
  ┌────────────────────────────────────────┬──────────────────┬────────────────────┐
  │ 8. L'appli répond-elle correctement ?  │ curl -v          │ bug applicatif     │
  │ 7. Un filtre jette-t-il le paquet ?    │ nft list ruleset │ pare-feu           │
- │ 6. Le port écoute-t-il, sur QUELLE IP ?│ ss -lntp         │ bind 127.0.0.1     │
- │ 5. Le paquet part-il / arrive-t-il ?   │ tcpdump          │ routage, MTU, ACL  │
- │ 4. Le nom se résout-il ?               │ getent / dig     │ DNS                │
- │ 3. Ai-je une ROUTE vers la cible ?     │ ip route get     │ passerelle absente │
- │ 2. Le voisin L2 répond-il ?            │ ip neigh         │ VLAN, ARP, câble   │
- │ 1. Ai-je une interface UP et une IP ?  │ ip -br a         │ DHCP, lien         │
+ │ 6. Le port écoute-t-il, sur QUELLE IP ?│ ss -lntp / nc -zv│ bind 127.0.0.1     │
+ │ 5. Le nom se résout-il ?               │ getent / dig     │ DNS                │
+ │ 4. Ai-je une ROUTE vers la cible ?     │ ip route get     │ passerelle absente │
+ │ 3. Le voisin L2 répond-il ?            │ ip neigh         │ VLAN, ARP, câble   │
+ │ 2. Ai-je une ADRESSE IP ?              │ ip -br addr      │ DHCP mort, 169.254 │
+ │ 1. L'interface est-elle UP ?           │ ip -br link      │ NO-CARRIER, câble  │
  └────────────────────────────────────────┴──────────────────┴────────────────────┘
      ↑ on lit de BAS en HAUT : on ne monte que si l'étage du dessous est vert
+     tcpdump n'est pas un étage : il traverse les étages 4 à 7 et dit OÙ le paquet disparaît
 ```
 
 Ce module est la boîte à outils de ces huit lignes, plus la couche du dessous qui explique *pourquoi* elles
@@ -75,7 +76,7 @@ binaire officielle du noyau : tout ce que le noyau sait, netlink le rend.
                  │  vision PARTIELLE, figée                │ vision COMPLÈTE
                  ▼                                         ▼
      ✗ 1 seule IP par interface (alias eth0:0)   ✓ N adresses par interface
-     ✗ table "main" uniquement                   ✓ 255 tables + ip rule
+     ✗ table "main" uniquement                   ✓ 2³² tables + ip rule
      ✗ pas de policy routing, pas de VRF         ✓ VRF, netns, mpls, xfrm
      ✗ IPv6 bricolé                              ✓ IPv6 de première classe
      ✗ netstat -a lent sur 100k sockets          ✓ ss instantané
@@ -857,7 +858,7 @@ tcpdump -i eth0 'ether host 06:1f:3a:9c:4e:22'
 | `ip[8] < 5` | TTL < 5 (paquets près de l'expiration) |
 | `ip[6] & 0x20 != 0` | flag *More Fragments* → fragmentation en cours |
 | `ip[6:2] & 0x1fff != 0` | fragments **non initiaux** |
-| `udp[8:2] = 0x0100` | requêtes DNS (flags standard query) |
+| `udp[10:2] = 0x0100` | requêtes DNS (les 2 octets de **flags** DNS, après l'en-tête UDP de 8 o et l'ID de 2 o ; `udp[10] & 0x80 = 0` = toute question) |
 | `tcp[((tcp[12] & 0xf0) >> 2):4] = 0x47455420` | payload commençant par `GET ` (0x47='G') |
 
 Le dernier mérite son décodage : `tcp[12]` contient le *data offset* dans ses 4 bits hauts ; `& 0xf0 >> 2`
@@ -906,7 +907,10 @@ Les noms symboliques disponibles : `tcp-syn` (0x02), `tcp-ack` (0x10), `tcp-fin`
 - **`Flags [...]`** : `S`=SYN, `S.`=SYN+ACK (le point signifie ACK), `.`=ACK seul, `P.`=PSH+ACK (données),
   `F.`=FIN+ACK, `R`=RST, `W`=CWR, `E`=ECE.
 - `seq 1:52 … length 51` — après le premier paquet, tcpdump passe en **numéros relatifs** : octets 1 à 51.
-- `win 502` — la fenêtre annoncée, **déjà multipliée** par le window scale négocié (ici 2⁷).
+- `win 502` — la **valeur brute** du champ Window de l'en-tête TCP. **tcpdump n'applique PAS le window
+  scale** : la fenêtre réelle vaut ici `502 × 2⁷ = 64 256` octets. (C'est Wireshark, pas tcpdump, qui affiche
+  une « calculated window size ». D'où le contraste apparent entre le `win 64240` du SYN — avant que le
+  scaling ne soit négocié — et le `win 502` des paquets suivants.)
 - La dernière ligne : un **RST 5,3 s après** le dernier échange. Ce n'est pas le réseau : quelque chose a
   décidé de couper — timeout d'un load balancer, `idle timeout` de NAT, ou l'application qui ferme brutalement.
 

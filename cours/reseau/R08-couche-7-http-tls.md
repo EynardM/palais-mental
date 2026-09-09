@@ -164,8 +164,10 @@ pressions ne donnent pas le même résultat qu'une. `PUT /config = {x:1}` est un
 C'est la propriété qui décide si une bibliothèque a le droit de **rejouer automatiquement** une requête
 après un timeout. `urllib3` / `requests` ne rejouent par défaut que les méthodes idempotentes
 (`DELETE, GET, HEAD, OPTIONS, PUT, TRACE`) — `POST` est exclu de `allowed_methods`. nginx en reverse proxy
-ne repasse par défaut sur un autre backend que sur des erreurs de connexion, précisément pour ne pas
-rejouer un `POST` déjà traité.
+bascule par défaut sur un autre backend sur `error` **et** `timeout` (`proxy_next_upstream error timeout`),
+mais **refuse de rejouer une requête non idempotente** (`POST`, `PATCH`, `LOCK`) déjà transmise à l'amont —
+il faut ajouter explicitement le paramètre `non_idempotent` pour l'y forcer. Même logique, autre mécanisme :
+ce n'est pas la nature de l'erreur qui protège, c'est la méthode.
 
 > ❓ **RETIENS ÇA** — `DELETE` renvoie 404 au deuxième appel. Est-il encore idempotent ?
 > <details><summary>→ réponse</summary><br><b>Oui.</b> L'idempotence porte sur l'<b>état du serveur</b>, pas sur le code de réponse. Après un ou dix <code>DELETE /job/42</code>, la ressource est absente : même état final. Ce qui casse l'idempotence, c'est <code>POST</code>, qui crée une ressource de plus à chaque appel.</details>
@@ -1403,9 +1405,12 @@ CORRECTIONS, dans l'ordre :
      (envoyer un WINDOW_UPDATE sur le flux 0) — les deux, sinon la connexion plafonne ;
   2. vérifier aussi la fenêtre TCP en dessous (wscale, tcp_rmem) : DEUX fenêtres en série,
      c'est la plus petite qui gagne ;
-  3. ou : télécharger en N requêtes `Range:` parallèles — N flux × 640 Kio/s.
-     Avec N = 20 : 20 × 640 Kio/s = 12 800 Kio/s = ~12,5 Mio/s. C'est exactement ce que fait le téléchargement
-     multipart d'un SDK objet.
+  3. ou : télécharger en N requêtes `Range:` parallèles, sur N CONNEXIONS distinctes —
+     N × 640 Kio/s. Avec N = 20 : 20 × 640 Kio/s = 12 800 Kio/s = ~12,5 Mio/s. C'est exactement
+     ce que fait le téléchargement multipart d'un SDK objet, qui puise dans un pool de connexions.
+     ⚠️ N flux parallèles sur UNE SEULE connexion HTTP/2 ne multiplient RIEN : la fenêtre de
+     CONNEXION vaut elle aussi 65 535 o par défaut, et elle n'est pas réglable par SETTINGS
+     (seulement par WINDOW_UPDATE sur le flux 0). Les 20 flux se partageraient les mêmes 640 Kio/s.
 
 ATTENTION AU PIÈGE CLASSIQUE : deux fenêtres imbriquées, la HTTP/2 (par flux ET par
 connexion) et la TCP. Relever l'une sans l'autre ne change rien.

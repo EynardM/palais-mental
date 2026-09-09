@@ -29,7 +29,7 @@ Que fait le bit setgid sur un repertoire ?	Les fichiers crees dedans heritent du
 Que fait le sticky bit sur un repertoire, et ou le voit-on tous les jours ?	Seul le proprietaire d'un fichier peut le supprimer. Sur /tmp, en mode 1777 (drwxrwxrwt).
 Combien de champs contient une ligne de /etc/passwd, et lesquels ?	7 : nom, x, UID, GID, GECOS, repertoire personnel, shell
 Pourquoi 'usermod -G data alice' est-il dangereux ?	Sans -a il REMPLACE tous les groupes secondaires au lieu d'en ajouter un
-Que signifie Type=simple dans une unit systemd ?	Le service est considere demarre des le execve ; le processus doit rester au premier plan
+Que signifie Type=simple dans une unit systemd ?	Le service est considere demarre des que le processus est forke, sans attendre le succes de execve (c'est Type=exec qui attend). Le processus doit rester au premier plan.
 Difference entre Requires= et After= dans systemd ?	Requires = dependance (l'unite doit etre active), After = ordre de demarrage. Un Requires seul lance les deux en parallele.
 Quelle commande est obligatoire apres avoir modifie un fichier .service ?	systemctl daemon-reload
 Que fait Persistent=true dans un timer systemd ?	Rattrape l'execution manquee si la machine etait eteinte a l'heure prevue

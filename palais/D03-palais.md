@@ -47,8 +47,8 @@ contenu — `/data in` — sur le carrelage, **en vrac, sans emballage, avec un 
 Personne ne le ramasse, personne ne le range. Ça colle aux semelles.
 
 **Lien → notion.** Le contenu de la variable est **déposé tel quel**, avec ses espaces et ses étoiles,
-et **sans protection**. C'est là que naît le bug : il ne se déclenchera que trois pièces plus loin, au
-bureau.
+et **sans protection**. C'est là que naît le bug : il ne se déclenchera que quatre pièces plus loin, au
+bureau (3 → 7).
 
 ---
 
@@ -157,6 +157,6 @@ découpage, `<( )`, `$( )`, `$(( ))`, `$v`, `~`, `{a,b}`.
 
 **Les deux questions qui tombent** :
 - *« Le découpage arrive avant ou après le remplacement de la variable ? »* → **Après** : la cuisine (3)
-  est avant le bureau (7), et il y a **quatre pièces** entre les deux. C'est tout le drame.
+  est avant le bureau (7), et il y a **trois pièces** entre les deux. C'est tout le drame.
 - *« Pourquoi les guillemets suffisent-ils ? »* → Ils sont encore là au bureau (7) et à la bibliothèque
   (8), et ne fondent qu'à la salle de bain (9).

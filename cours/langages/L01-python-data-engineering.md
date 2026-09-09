@@ -66,8 +66,10 @@ Trois opérateurs à ne jamais confondre :
 
 > ⚠️ **PIÈGE** — `a is b` peut être **vrai par accident**. CPython met en cache les petits entiers de
 > **-5 à 256** et interne les chaînes qui ressemblent à des identifiants. D'où :
-> `a = 256; b = 256; a is b` → `True`, mais `a = 257; b = 257; a is b` → `False` (en script ;
-> dans une même ligne du REPL, l'optimiseur de constantes peut te rendre `True`).
+> `a = 256; b = 256; a is b` → `True` **toujours** (cache). Et `a = 257; b = 257; a is b` → `True`
+> **aussi** dans un script, un module ou une fonction : le compilateur **dédoublonne les constantes**
+> d'un même objet-code. Ça ne devient `False` que si les objets-codes diffèrent (deux lignes séparées
+> du REPL) ou si la valeur est **calculée à l'exécution** : `a is int("257")` → `False`.
 > **Conclusion opérationnelle : `is` uniquement pour `None`, `True`, `False`.** Jamais pour comparer
 > des valeurs. `if x is None:` — jamais `if x == None:`.
 
@@ -200,7 +202,7 @@ Réponse quasi certaine : une **complexité linéaire dans une boucle**, donc un
 | insertion / retrait en **tête** | **O(n)** | **O(1)** | — | — | — |
 | suppression par valeur | O(n) | O(n) | O(1) moy. | O(1) moy. | — |
 | tri (`sorted`, `list.sort`) | O(n log n) | — | — | — | O(n log n) |
-| mémoire (vide, CPython 64 bits) | 56 o | ~624 o | 64 o | 216 o | 40 o |
+| mémoire (vide, CPython 64 bits) | 56 o | ~760 o (3.11 ; ~624 avant) | 64 o | 216 o | 40 o |
 
 Précisions qui font la différence en entretien :
 
@@ -219,7 +221,7 @@ Précisions qui font la différence en entretien :
 > ❓ **RETIENS ÇA** — Complexité de `x in ma_liste` versus `x in mon_set` ?
 > <details><summary>→ réponse</summary><br><b>O(n)</b> pour la liste (parcours élément par élément avec <code>==</code>) contre <b>O(1) en moyenne</b> pour le set (un calcul de hash puis un accès direct). C'est la transformation la plus rentable du data engineering débutant.</details>
 
-### Exercice corrigé — la jointure qui met 4 heures
+### Exercice corrigé — la jointure qui met 17 minutes au lieu de 25 ms
 
 **Énoncé.** Tu croises une liste de 200 000 flux NetFlow avec une liste de 50 000 adresses IP
 blacklistées. Version naïve :
@@ -240,7 +242,7 @@ Combien d'opérations élémentaires ? Et avec un `set` ?
    comparaison d'objets simples), ça fait ≈ **1000 s ≈ 17 minutes**, et bien plus si `==` porte sur des
    objets complexes.
 5. Avec `blacklist = set(blacklist)` : la construction du set coûte **50 000** hachages, puis chaque test
-   coûte **1** hachage. Total ≈ 50 000 + 200 000 = **250 000** opérations.
+   coûte **1** hachage. Total ≈ 50 000 + 200 000 = **250 000** opérations, soit ≈ **25 ms**.
 
 **Gain : 10 000 000 000 / 250 000 = 40 000×.** Une ligne changée, `set(...)` autour de la blacklist.
 
@@ -614,7 +616,9 @@ plus optionnel dans une équipe data professionnelle.
 def moyenne(valeurs: list[float]) -> float:
     return sum(valeurs) / len(valeurs)
 
-moyenne("bonjour")     # aucune erreur de typage ! Python ne vérifie RIEN
+moyenne((1, 2, 3))     # -> 2.0 : un tuple là où l'annotation dit `list`, aucune erreur.
+                       # Python ne vérifie RIEN. (moyenne("bonjour") plante, mais sur le `+`
+                       # de sum(), pas sur l'annotation : ce n'est pas une erreur de typage.)
 ```
 
 Les annotations sont stockées dans `__annotations__` et **ignorées par l'interpréteur**. Elles servent
@@ -1206,7 +1210,7 @@ json.loads(texte)                                   # str -> objet
 json.dumps(obj, ensure_ascii=False, separators=(",", ":"))   # objet -> str compact et lisible
 ```
 
-- `ensure_ascii=True` **par défaut** : les accents sortent en `é`. Mets `False` pour de l'UTF-8 lisible.
+- `ensure_ascii=True` **par défaut** : les non-ASCII sortent **échappés** (`"é"` → `"\u00e9"`). Mets `False` pour de l'UTF-8 lisible.
 - `json.load(f)` charge **tout** en mémoire → interdit sur un gros fichier.
 - Pour du volume : **JSON Lines / NDJSON** — un objet JSON par ligne, donc lisible en streaming,
   concaténable et splittable. C'est le format d'échange de flux le plus courant.

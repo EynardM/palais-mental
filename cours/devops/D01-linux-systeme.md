@@ -278,7 +278,8 @@ Un tube (`|`) est un **tampon en mémoire du noyau de 64 Kio** entre deux proces
 
 > ⚠️ **PIÈGE — le code de retour d'un pipeline** est celui de **la dernière commande**.
 > `curl -f url | wc -l` renvoie 0 même si `curl` a échoué. Remèdes : `set -o pipefail` (le pipeline
-> prend le premier code non nul), ou le tableau `${PIPESTATUS[@]}`.
+> prend le code de la **dernière** commande sortie en erreur, c'est-à-dire la plus à droite des
+> commandes non nulles), ou le tableau `${PIPESTATUS[@]}` qui donne les codes de toutes les étapes.
 
 > ⚠️ **PIÈGE — la bufferisation, tueur silencieux de logs.** La libc bufferise stdout **par ligne quand
 > c'est un terminal**, mais **par blocs (4 Kio) quand c'est un fichier ou un tube**. D'où : ton script
@@ -860,7 +861,8 @@ MemoryMax=8G                # cgroup : au-delà, OOM kill dans CE cgroup uniquem
 CPUQuota=200%               # 2 cœurs au maximum
 PrivateTmp=true             # /tmp isolé, jeté à l'arrêt
 NoNewPrivileges=true        # interdit toute élévation via setuid
-ProtectSystem=strict        # /usr et /etc en lecture seule
+ProtectSystem=strict        # TOUTE l'arborescence en lecture seule sauf /dev, /proc, /sys
+                            # (=full : /usr + /boot + /etc ; =yes : /usr + /boot)
 ReadWritePaths=/data/etl
 
 [Install]
@@ -871,7 +873,7 @@ WantedBy=multi-user.target  # cible qui l'active au boot, créée par 'systemctl
 
 | Type | Quand systemd considère le service « démarré » | Cas d'usage |
 |---|---|---|
-| **`simple`** (défaut) | **immédiatement** après `fork`/`exec` | processus au premier plan |
+| **`simple`** (défaut) | **immédiatement après le `fork`**, sans attendre que `execve()` réussisse | processus au premier plan |
 | `exec` | après le `execve()` réussi | comme simple, mais détecte un binaire absent |
 | `forking` | quand le processus **parent se termine** | vieux démons qui se détachent (`daemonize`) |
 | `oneshot` | quand le processus **a fini** | tâches ponctuelles (avec `RemainAfterExit=yes`) |
@@ -920,7 +922,7 @@ $ systemd-analyze critical-chain                    # le chemin critique du boot
 $ systemctl status etl-ventes
 ● etl-ventes.service - ETL quotidien des ventes
      Loaded: loaded (/etc/systemd/system/etl-ventes.service; enabled; preset: enabled)
-     Active: active (running) since Tue 2026-09-09 02:00:03 UTC; 12h ago
+     Active: active (running) since Wed 2026-09-09 02:00:03 UTC; 12h ago
    Main PID: 41207 (python)
       Tasks: 9 (limit: 38314)
      Memory: 2.1G (max: 8.0G available: 5.8G)
@@ -992,7 +994,7 @@ WantedBy=timers.target
 ```bash
 $ systemctl list-timers --all
 NEXT                        LEFT     LAST                        PASSED  UNIT              ACTIVATES
-Wed 2026-09-10 02:00:00 UTC 11h left Tue 2026-09-09 02:00:00 UTC 12h ago etl-ventes.timer  etl-ventes.service
+Thu 2026-09-10 02:00:00 UTC 12h left Wed 2026-09-09 02:00:00 UTC 12h ago etl-ventes.timer  etl-ventes.service
 $ systemd-analyze calendar "Mon..Fri *-*-* 06:30:00"    # vérifier une expression AVANT de la poser
 ```
 
@@ -1095,8 +1097,8 @@ L'acte de décès est dans le journal du noyau :
 
 ```bash
 $ dmesg -T | tail -6
-[Tue Sep  9 15:41:02 2026] java invoked oom-killer: gfp_mask=0x140cca, order=0, oom_score_adj=0
-[Tue Sep  9 15:41:02 2026] Memory cgroup out of memory: Killed process 41207 (java)
+[Wed Sep  9 15:41:02 2026] java invoked oom-killer: gfp_mask=0x140cca, order=0, oom_score_adj=0
+[Wed Sep  9 15:41:02 2026] Memory cgroup out of memory: Killed process 41207 (java)
                             total-vm:12874216kB, anon-rss:8253100kB, file-rss:24816kB, shmem-rss:0kB,
                             UID:1001 pgtables:16612kB oom_score_adj:0
 ```

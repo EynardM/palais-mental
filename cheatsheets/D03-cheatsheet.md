@@ -74,7 +74,7 @@ rendu 255, 125 tué par un signal.
 
 | Écriture | Effet | `f=/data/raw/ventes.csv.gz` |
 |---|---|---|
-| `${#v}` | longueur | `24` |
+| `${#v}` | longueur | `23` |
 | `${v:-def}` | défaut si vide/absent | |
 | `${v:=def}` | défaut **et affecte** | |
 | `${v:?msg}` | **erreur + sortie** si vide/absent | validation |

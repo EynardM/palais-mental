@@ -159,10 +159,14 @@ Ne fabrique pas un second palais. **Modifie celui-ci**, c'est plus rapide et ça
 | **6. Fenêtre** | **le gong disparaît** : plus de `ServerHelloDone` |
 | **8. Bibliothèque** | **l'étagère ne pivote plus** : la demi-clé du client était déjà partie à l'emplacement 1. Seul le **bras mécanique** subsiste, en mTLS (`CertificateVerify` du client) |
 | **9-10.** | `ChangeCipherSpec` n'est plus qu'un **figurant** conservé pour ne pas effrayer les boîtiers intermédiaires |
+| **⚠️ 9 et 10 S'INVERSENT** | en 1.2, le `Finished` du **client** (9) part **avant** celui du **serveur** (10). En **1.3, c'est l'inverse** : le `Finished` du **serveur** voyage dans le **même envol** que son certificat, donc **la chambre passe AVANT la salle de bain**. Ordre 1.3 : porte → couloir → cuisine → table → **chambre** → **salle de bain** |
 
 **Résultat, et de 2 RTT à 1 RTT** : sans mTLS, le parcours passe de **8 emplacements** (1-2-3-4-6-8-9-10)
-à **6** (la fenêtre et la bibliothèque disparaissent) ; avec mTLS, de **10 à 9**. L'image à garder : en 1.3,
-**le gamin arrive avec sa demi-clé à la main**, et la mousse blanche envahit la maison **dès le couloir**.
+à **6** (la fenêtre et la bibliothèque disparaissent), et ces 6 se parcourent dans l'ordre
+**1-2-3-4-10-9** — le serveur finit sa phrase avant que le client ne commence la sienne ; avec mTLS,
+de **10 à 9** (1-2-3-4-5-10-7-8-9). L'image à garder : en 1.3, **le gamin arrive avec sa demi-clé à la
+main**, la mousse blanche envahit la maison **dès le couloir**, et **le majordome est couché avant que
+tu n'entres dans la salle de bain**.
 
 ---
 
@@ -191,3 +195,6 @@ Dis-le d'un trait, en marchant :
    bureau : ton badge) et **le bras mécanique de la bibliothèque** (le registre = `CertificateVerify` du
    client, signé **après** la demi-clé). Aucun emplacement ne disparaît en mTLS : ils s'ajoutent.
 5. Réponds : « **où tombe la frontière entre RTT 1 et RTT 2 ?** » → **après la fenêtre** (emplacement 6).
+6. Réponds : « **en TLS 1.3, qui envoie son `Finished` en premier ?** » → **le serveur** (emplacement 10,
+   collé à son certificat), puis le client (emplacement 9). **C'est l'inverse de 1.2** — et c'est le piège
+   d'entretien classique sur la séquence 1.3.
