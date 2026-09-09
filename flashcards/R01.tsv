@@ -1,0 +1,45 @@
+Couche 4 du modèle OSI ?	Transport
+Couche 3 du modèle OSI ?	Réseau
+Couche 2 du modèle OSI ?	Liaison de données
+Combien de couches dans le modèle TCP/IP de référence, et lesquelles ?	4 : Accès réseau, Internet, Transport, Application
+Quelles couches OSI la couche Application de TCP/IP regroupe-t-elle ?	Les couches 5, 6 et 7
+Nom de la PDU de couche 2 ?	La trame
+Nom de la PDU de couche 3 ?	Le paquet
+Nom de la PDU de couche 4 en TCP ?	Le segment
+Nom de la PDU de couche 4 en UDP ?	Le datagramme
+Taille d'un en-tête Ethernet II ?	14 octets (6 MAC dst + 6 MAC src + 2 EtherType)
+Taille d'un en-tête IPv4 minimal ?	20 octets (jusqu'à 60 avec options)
+Taille d'un en-tête IPv6 ?	40 octets, fixe
+Taille d'un en-tête TCP minimal ?	20 octets (jusqu'à 60 avec options)
+Taille d'un en-tête UDP ?	8 octets, fixe
+Taille du FCS d'une trame Ethernet, et où est-il placé ?	4 octets, en queue de trame et non en tête
+Sur combien de bits une adresse MAC ?	48 bits, soit 6 octets
+Valeur du champ Protocol de l'en-tête IP pour TCP ?	6
+Valeur du champ Protocol de l'en-tête IP pour UDP ?	17
+Que vaut le MTU d'un lien Ethernet standard ?	1500 octets
+Le MTU inclut-il l'en-tête Ethernet ?	Non. C'est la taille max du paquet IP, en-tête IP compris.
+Formule du MSS ?	MSS = MTU − en-tête IP − en-tête TCP
+Que vaut le MSS sur Ethernet en IPv4 ?	1460 octets (1500 − 20 − 20)
+Dans quel paquet le MSS est-il annoncé ?	Dans les options TCP du SYN, par chaque côté
+Dans quelle unité s'exprime le champ Fragment Offset d'IPv4 ?	En unités de 8 octets
+Où se fait le réassemblage des fragments IP ?	Uniquement à la destination finale, jamais sur un routeur intermédiaire
+Quel message ICMP porte l'information de PMTU en IPv4 ?	ICMP type 3 code 4, Fragmentation Needed and DF set
+Quel message ICMPv6 porte l'information de PMTU ?	ICMPv6 type 2, Packet Too Big
+Quelle commande teste un chemin à MTU 1500 sans fragmentation ?	ping -M do -s 1472 (1472 + 8 ICMP + 20 IP)
+Symptôme typique d'un PMTU black hole ?	Handshake et petites requêtes OK, gros transferts figés puis timeout
+Que change un routeur dans un paquet qu'il fait suivre ?	Les deux adresses MAC, le TTL (−1) et le checksum d'en-tête IP
+Que ne change PAS un routeur dans un paquet ?	Les adresses IP source et destination, les ports et les données, sauf NAT
+Pour quelle adresse une machine fait-elle un ARP si la destination est hors de son sous-réseau ?	Pour sa passerelle, jamais pour la destination finale
+Quel équipement segmente les domaines de broadcast ?	Le routeur. Le switch, lui, segmente les domaines de collision.
+Qu'est-ce qui distingue un load balancer L7 d'un L4 ?	Le L7 termine la connexion TCP et en ouvre une nouvelle vers le backend
+Combien d'octets d'overhead ajoute VXLAN sur IPv4 ?	50 octets : 14 Ethernet + 20 IP + 8 UDP + 8 VXLAN externes
+Quel MTU interne avec VXLAN sur un underlay à 1500 ?	1450 octets
+Sur quel port UDP tourne VXLAN ?	4789
+Sur quel protocole de transport et quel port tourne QUIC ?	UDP, port 443
+Dans quelle couche OSI range-t-on TLS par convention ?	Couche 6, présentation, car il est entre la 4 et la 7
+Pourquoi un NAT doit-il recalculer le checksum TCP ?	Parce que ce checksum inclut un pseudo-en-tête contenant les adresses IP
+Formule du débit maximal d'une connexion TCP unique ?	Débit = Fenêtre de réception / RTT
+Fenêtre TCP maximale sans l'option window scaling ?	65 535 octets
+Valeur de TTL initiale par défaut sous Linux ?	64 (Windows 128, routeurs Cisco 255)
+Que signifie un Connection refused immédiat ?	Le paquet est bien arrivé mais rien n'écoute sur ce port
+Que signifie un Connection timed out ?	Rien ne répond : DROP silencieux, security group ou mauvaise route

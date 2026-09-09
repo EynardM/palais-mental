@@ -1,0 +1,45 @@
+Taille d'une adresse MAC ?	48 bits = 6 octets = 12 caracteres hexadecimaux
+Taille minimale d'une trame Ethernet II sans tag ?	64 octets (FCS compris, preambule exclu)
+Taille maximale d'une trame Ethernet II sans tag ?	1518 octets (1522 avec un tag 802.1Q)
+Que fait Ethernet d'une trame dont le FCS est faux ?	Il la jette silencieusement : aucune retransmission en couche 2, c'est TCP qui detectera le trou
+EtherType d'IPv4 ?	0x0800
+EtherType d'ARP ?	0x0806
+EtherType d'un tag VLAN 802.1Q ?	0x8100
+Quel bit d'une adresse MAC distingue unicast et multicast ?	Le bit de poids faible du premier octet (bit I/G). Premier octet pair = unicast
+Quels deuxiemes chiffres hexa signalent une MAC unicast locally administered ?	2, 6, A et E
+Taille de l'en-tete ARP ?	28 octets : la trame fait 42 octets, bourree a 64
+Qu'est-ce qui definit un gratuitous ARP ?	SPA == TPA : l'emetteur annonce sa propre adresse au lieu de la demander
+A quoi sert un gratuitous ARP en production ?	A mettre a jour instantanement caches ARP et tables CAM apres une bascule HA ou une migration de VM
+Duree par defaut de l'etat REACHABLE d'un voisin sous Linux ?	30 secondes (base_reachable_time_ms = 30000)
+Que signifie l'etat STALE dans la sortie de ip neigh show ?	Entree presente mais non confirmee recemment : elle reste utilisable
+Valeur par defaut de gc_thresh3 sous Linux, et pourquoi ca compte en Kubernetes ?	1024 : un noeud dense la depasse et provoque neighbor table overflow
+Defense d'entreprise contre l'ARP spoofing ?	DHCP snooping + Dynamic ARP Inspection (DAI) sur le switch
+Sur quelle adresse un switch apprend-il ?	Sur la MAC source de la trame entrante
+Sur quelle adresse un switch decide-t-il de commuter ou de flooder ?	Sur la MAC destination
+Aging time par defaut d'une table CAM ?	300 secondes (5 minutes)
+Que fait un switch d'une trame unicast dont la destination est inconnue ?	Il la floode sur tous les ports du VLAN sauf celui d'entree
+Que devient un switch dont la table CAM est saturee ?	Il floode tout l'unicast inconnu et se comporte comme un hub. Defense : port security
+Qu'est-ce qui decoupe un domaine de broadcast ?	Un routeur ou une frontiere de VLAN. Jamais un switch seul
+Difference entre store-and-forward et cut-through ?	Store-and-forward verifie le FCS avant de retransmettre (2-10 us) ; cut-through decide des 6 premiers octets (0,3-1 us) sans verifier
+Taille du tag 802.1Q ?	4 octets, inseres apres la MAC source
+Combien de bits pour le VLAN ID ?	12 bits
+Combien de VLAN 802.1Q utilisables ?	4094 : de 1 a 4094, car 0 et 4095 sont reserves
+Difference entre un port access et un port trunk ?	Access = 1 seul VLAN, trames non taguees. Trunk = plusieurs VLAN, trames taguees sauf le VLAN natif
+Qu'exploite l'attaque de VLAN hopping par double tagging ?	Le VLAN natif du trunk, qui circule sans tag : le premier switch retire le tag externe
+Pourquoi une boucle de couche 2 est-elle mortelle ?	La trame Ethernet n'a pas de TTL : les copies se multiplient a l'infini, c'est la tempete de broadcast
+Priorite de bridge STP par defaut ?	32768, modifiable par pas de 4096
+Qui devient root bridge en STP ?	Le switch au Bridge ID le plus faible : priorite d'abord, puis MAC la plus basse
+Valeur du timer Hello en STP ?	2 secondes
+Valeur du Forward Delay en STP ?	15 secondes, pour listening puis pour learning
+Valeur du Max Age en STP ?	20 secondes
+Temps de convergence de 802.1D ?	30 secondes en general, jusqu'a 50 s s'il faut d'abord expirer le Max Age. RSTP : moins d'une seconde
+Quelle protection doit toujours accompagner PortFast ?	BPDU Guard
+Debit maximal d'un seul flux TCP sur un agregat LACP de 4 x 10 Gbit/s ?	10 Gbit/s : le hash fige un flux donne sur un unique lien
+Overhead d'une encapsulation VXLAN ?	50 octets : 14 Ethernet + 20 IP + 8 UDP + 8 VXLAN
+Quel MTU configurer sur un pod Kubernetes en overlay VXLAN au-dessus d'un underlay a 1500 ?	1450
+Formule du MSS TCP en IPv4 ?	MSS = MTU - 40 (20 IP + 20 TCP), soit 1460 pour un MTU de 1500
+Quelle taille de ping -M do -s teste un MTU de 1500 ?	1472, soit MTU - 28
+Quelle taille de ping -M do -s teste un MTU de 9000 ?	8972
+Quel message ICMP est indispensable au Path MTU Discovery ?	Type 3 code 4 : Fragmentation Needed
+Symptome typique d'un trou noir PMTU ?	Le ping et le handshake TCP passent, les gros transferts bloquent puis timeout
+Quel est le vrai gain des jumbo frames ?	Pas la bande passante (+4,4 %) mais le CPU : environ 6 fois moins de trames par seconde
